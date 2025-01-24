@@ -106,6 +106,7 @@
   "purviewAccounts": "pview-",
   "recoveryServicesVaults": "rsv-",
   "resourcesResourceGroups": "rg-",
+  "storageAccounts": "st",
   "searchSearchServices": "srch-",
   "serviceBusNamespaces": "sb-",
   "serviceBusNamespacesQueues": "sbq-",

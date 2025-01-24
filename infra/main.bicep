@@ -14,6 +14,7 @@ param resourceGroupName string = ''
 param containerAppsEnvironmentName string = ''
 param containerRegistryName string = ''
 param openaiName string = ''
+param storageAccountName string = ''
 param cosmosDbAccountName string = ''
 param cosmosDatabaseName string = 'financialagents'
 param cosmosContainerName string = 'documents'
@@ -38,14 +39,6 @@ param openaiApiVersion string = '2024-02-01'
 param openaiCapacity int = 50
 param modelDeployments array = [
   {
-    name: completionDeploymentModelName
-    model: {
-      format: 'OpenAI'
-      name: completionModelName
-      version: completionModelVersion
-    }
-  }
-  {
     name: smallcompletionDeploymentModelName
     model: {
       format: 'OpenAI'
@@ -68,6 +61,14 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
   location: location
   tags: tags
+}
+
+module storage './core/data/storage.bicep' = {
+  name: 'storage'
+  scope: resourceGroup
+  params: {
+    storageAccountName: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageAccounts}${resourceToken}'
+  }
 }
 
 // Container apps host (including container registry)
@@ -165,3 +166,5 @@ output AZURE_AI_SEARCH_KEY string = search.outputs.searchAdminKey
 output AZURE_AI_SEARCH_INDEX string = searchIndexName
 output BACKEND_API_URL string = 'http://localhost:8000'
 output FRONTEND_SITE_NAME string = 'http://127.0.0.1:3000'
+output STORAGE_ACCOUNT_URL string = storage.outputs.storageAccountUrl
+output STORAGE_ACCOUNT_CONNECTION_STRING string = storage.outputs.storageConnectionString

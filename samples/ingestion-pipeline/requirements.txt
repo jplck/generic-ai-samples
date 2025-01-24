@@ -1,1 +1,3 @@
 docling
+azure-storage-blob 
+azure-identity

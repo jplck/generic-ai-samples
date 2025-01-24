@@ -42,6 +42,7 @@ ENVIRONMENT_NAME=$(az resource list -g $RESOURCE_GROUP --resource-type "Microsof
 IDENTITY_NAME=$(az resource list -g $RESOURCE_GROUP --resource-type "Microsoft.ManagedIdentity/userAssignedIdentities" --query "[0].name" -o tsv)
 AZURE_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 COSMOSDB_NAME=$(az resource list -g $RESOURCE_GROUP --resource-type "Microsoft.DocumentDB/databaseAccounts" --query "[0].name" -o tsv)
+STORAGE_NAME=$(az resource list -g $RESOURCE_GROUP --resource-type "Microsoft.Storage/storageAccounts" --query "[0].name" -o tsv)
 
 echo "container registry name: $AZURE_CONTAINER_REGISTRY_NAME"
 echo "application insights name: $APPINSIGHTS_NAME"
@@ -49,6 +50,8 @@ echo "openai name: $OPENAI_NAME"
 echo "cosmosdb name: $COSMOSDB_NAME"
 echo "identity name: $IDENTITY_NAME"
 echo "service name: $SERVICE_NAME"
+echo "resource group: $RESOURCE_GROUP"
+echo "storage name: $STORAGE_NAME"
 
 CONTAINER_APP_EXISTS=$(az resource list -g $RESOURCE_GROUP --resource-type "Microsoft.App/containerApps" --query "[?contains(name, '$SERVICE_NAME')].id" -o tsv)
 EXISTS="false"
@@ -69,9 +72,6 @@ echo "deploying image: $IMAGE_NAME"
 
 ACA_NAME=roadcopilot$SERVICE_NAME
 
-URI=$(az deployment group create -g $RESOURCE_GROUP -f ./infra/core/app/web.bicep \
-          -p name=$ACA_NAME -p location=$LOCATION -p containerAppsEnvironmentName=$ENVIRONMENT_NAME \
-          -p containerRegistryName=$AZURE_CONTAINER_REGISTRY_NAME -p applicationInsightsName=$APPINSIGHTS_NAME -p serviceName=$SERVICE_NAME -p acssourceNumber=$SOURCENUMBER \
-          -p openaiName=$OPENAI_NAME -p identityName=$IDENTITY_NAME -p imageName=$IMAGE_NAME -p databaseAccountName=$COSMOSDB_NAME --query properties.outputs.uri.value)
+URI=''
 
 echo "deployment uri: $URI"
