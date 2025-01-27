@@ -23,6 +23,7 @@ OUTPUT_DIR = Path("output")
 DOCUMENT_CONTAINER = "documents"
 PROCESSED_DOCUMENT_CONTAINER = 'processed-documents'
 
+upload_results = os.getenv("UPLOAD_RESULTS", "false").lower() == "true"
 storage_url = os.getenv("STORAGE_ACCOUNT_URL")
 default_credential = DefaultAzureCredential()
 blob_service_client = BlobServiceClient(account_url=storage_url, credential=default_credential)
@@ -64,15 +65,19 @@ def main():
         download_blob(blob_client, file_output_path)
 
         converted_results_path = convert_file(file_output_path, converter)
+
         if converted_results_path:
             delete_file(file_output_path)
             url = move_blob(blob_client, lease.id, PROCESSED_DOCUMENT_CONTAINER)
-            metadata = {
-                'converted': 'true',
-                'original_file': url
-            }
 
-            upload_folder(converted_results_path, PROCESSED_DOCUMENT_CONTAINER, file.blob_name.rsplit('.', 1)[0], metadata)
+            #work with the results
+
+            if upload_results:
+                metadata = {
+                    'converted': 'true',
+                    'original_file': url
+                }
+                upload_folder(converted_results_path, PROCESSED_DOCUMENT_CONTAINER, file.blob_name.rsplit('.', 1)[0], metadata)
         else:
             lease.release()
             print(f"Failed to convert {file.blob_name}")

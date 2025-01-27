@@ -167,4 +167,4 @@ output AZURE_AI_SEARCH_INDEX string = searchIndexName
 output BACKEND_API_URL string = 'http://localhost:8000'
 output FRONTEND_SITE_NAME string = 'http://127.0.0.1:3000'
 output STORAGE_ACCOUNT_URL string = storage.outputs.storageAccountUrl
-output STORAGE_ACCOUNT_CONNECTION_STRING string = storage.outputs.storageConnectionString
+output UPLOAD_RESULTS bool = false
