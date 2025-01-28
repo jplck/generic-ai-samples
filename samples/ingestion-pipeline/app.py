@@ -15,6 +15,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from azure.storage.blob import BlobLeaseClient
 import os
 import dotenv
+from ..shared.storage import Container
 
 dotenv.load_dotenv()
 
@@ -25,13 +26,6 @@ PROCESSED_DOCUMENT_CONTAINER = 'processed-documents'
 
 upload_results = os.getenv("UPLOAD_RESULTS", "false").lower() == "true"
 storage_url = os.getenv("STORAGE_ACCOUNT_URL")
-default_credential = DefaultAzureCredential()
-blob_service_client = BlobServiceClient(account_url=storage_url, credential=default_credential)
-
-@dataclass
-class Blob:
-    container: str
-    blob_name: str
 
 def main():
     accelerator_options = AcceleratorOptions(
@@ -51,24 +45,24 @@ def main():
     dir = Path(OUTPUT_DIR)
     dir.mkdir(parents=True, exist_ok=True)
 
-    create_container_if_not_exists(DOCUMENT_CONTAINER)
+    container = Container(storage_url, DefaultAzureCredential(), DOCUMENT_CONTAINER)
+    container.create_container()
+    files = container.get_files()
 
-    files = get_list_of_files()
     for file in files:
-        blob_client = blob_service_client.get_blob_client(file.container, file.blob_name)
-        file_output_path = Path(OUTPUT_DIR, file.blob_name)
+        file_output_path = Path(OUTPUT_DIR, file.name)
 
-        if is_locked(blob_client):
+        if file.is_locked():
             continue
 
-        lease = create_lease(blob_client)
-        download_blob(blob_client, file_output_path)
+        file.lease()
+        file.download(file_output_path)
 
         converted_results_path = convert_file(file_output_path, converter)
 
         if converted_results_path:
             delete_file(file_output_path)
-            url = move_blob(blob_client, lease.id, PROCESSED_DOCUMENT_CONTAINER)
+            url = file.move_blob(PROCESSED_DOCUMENT_CONTAINER)
 
             #work with the results
 
@@ -77,25 +71,12 @@ def main():
                     'converted': 'true',
                     'original_file': url
                 }
-                upload_folder(converted_results_path, PROCESSED_DOCUMENT_CONTAINER, file.blob_name.rsplit('.', 1)[0], metadata)
+                upload_container = Container(storage_url, DefaultAzureCredential(), PROCESSED_DOCUMENT_CONTAINER)
+                upload_container.upload_from_local(converted_results_path, file.name.rsplit('.', 1)[0], metadata)
         else:
-            lease.release()
-            print(f"Failed to convert {file.blob_name}")
+            file.release_lease()
+            print(f"Failed to convert {file.name}")
 
-    
-def create_container_if_not_exists(container_name: str) -> ContainerClient:
-    document_container_client = blob_service_client.get_container_client(container_name)
-    if not document_container_client.exists():
-        document_container_client.create_container()
-    return document_container_client
-
-def is_locked(blob_client: BlobClient) -> bool:
-    return blob_client.get_blob_properties().lease.status == 'locked'
-
-def create_lease(blob_client: BlobClient) -> BlobLeaseClient:
-    lease_client = BlobLeaseClient(blob_client)
-    lease_client.acquire()
-    return lease_client
 
 def convert_file(path: Path, converter: DocumentConverter) -> Path:
     result = converter.convert(path, raises_on_error=False)
@@ -112,33 +93,8 @@ def store_result_locally(result: ConversionResult) -> Path:
         print(f"Failed to convert {result.stem}")
         return None
 
-def get_list_of_files() -> list[Blob]:
-    list = blob_service_client.get_container_client(DOCUMENT_CONTAINER).list_blobs()
-    return [Blob(DOCUMENT_CONTAINER, blob.name) for blob in list]
-
-def download_blob(blob_client: BlobClient, path: Path):
-    blob_data = blob_client.download_blob().readall()
-    with open(path, "wb") as f:
-        f.write(blob_data)
-
-def upload_folder(local_folder_path: str, container_name: str, folder_name: str, metadata: dict):
-    for root, dirs, files in os.walk(local_folder_path):
-        for file in files:
-            local_file_path = os.path.join(root, file)
-            relative_path = os.path.relpath(local_file_path, local_folder_path)
-            blob_name = f"{folder_name}/{relative_path.replace('\\', '/')}"
-            with open(local_file_path, "rb") as data:
-                blob_service_client.get_blob_client(container_name, blob_name).upload_blob(data, overwrite=True, metadata=metadata)
-
 def delete_file(file_name: str):
     os.remove(file_name)
-
-def move_blob(blob_client: BlobClient, lease_id: str, container_name: str) -> Path:
-    create_container_if_not_exists(container_name)
-    target_blob_client = blob_service_client.get_blob_client(container_name, blob_client.blob_name)
-    target_blob_client.start_copy_from_url(blob_client.url)
-    blob_client.delete_blob(lease=lease_id)
-    return target_blob_client.url
 
 if __name__ == "__main__":
     main()
