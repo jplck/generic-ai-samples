@@ -168,3 +168,4 @@ output BACKEND_API_URL string = 'http://localhost:8000'
 output FRONTEND_SITE_NAME string = 'http://127.0.0.1:3000'
 output STORAGE_ACCOUNT_URL string = storage.outputs.storageAccountUrl
 output UPLOAD_RESULTS bool = false
+output CHUNKING_ENABLED bool = true

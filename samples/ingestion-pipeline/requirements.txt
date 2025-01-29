@@ -1,3 +1,6 @@
 docling
 azure-storage-blob 
 azure-identity
+langchain_openai
+langchain_community
+azure-search-documents
