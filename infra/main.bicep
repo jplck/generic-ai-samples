@@ -26,24 +26,21 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName, 'app': 'ai-agents', 'tracing': 'yes' }
 param searchIndexName string = 'search-index'
-param completionDeploymentModelName string = 'gpt-4o'
-param completionModelName string = 'gpt-4o'
-param completionModelVersion string = '2024-08-06'
-param smallcompletionDeploymentModelName string = 'gpt-4o-mini'
-param smallcompletionModelName string = 'gpt-4o-mini'
-param smallcompletionModelVersion string = '2024-07-18'
+param completionDeploymentModelName string = 'gpt-4o-mini'
+param completionModelName string = 'gpt-4o-mini'
+param completionModelVersion string = '2024-07-18'
 param embeddingDeploymentModelName string = 'text-embedding-ada-002'
 param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingModelVersion string = '2'
-param openaiApiVersion string = '2024-02-01'
+param openaiApiVersion string = '2024-08-01-preview'
 param openaiCapacity int = 50
 param modelDeployments array = [
   {
-    name: smallcompletionDeploymentModelName
+    name: completionDeploymentModelName
     model: {
       format: 'OpenAI'
-      name: smallcompletionModelName
-      version: smallcompletionModelVersion
+      name: completionModelName
+      version: completionModelVersion
     }
   }
   {
@@ -148,16 +145,12 @@ output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
 output COSMOSDB_ENDPOINT string = cosmodDb.outputs.endpoint
 output COSMOSDB_DATABASE_NAME string = cosmosDatabaseName
 output COSMOSDB_CONTAINER_NAME string = cosmosContainerName
-output OPENAI_API_TYPE string = 'azure'
 output AZURE_OPENAI_API_VERSION string = openaiApiVersion
-output OPENAI_API_VERSION string = openaiApiVersion
 output AZURE_OPENAI_API_KEY string = openai.outputs.openaiKey
 output AZURE_OPENAI_ENDPOINT string = openai.outputs.openaiEndpoint
 output AZURE_OPENAI_COMPLETION_MODEL string = completionModelName
 output AZURE_OPENAI_COMPLETION_DEPLOYMENT_NAME string = completionDeploymentModelName
-output AZURE_OPENAI_SMALL_COMPLETION_MODEL string = smallcompletionModelName
-output AZURE_OPENAI_SMALL_COMPLETION_DEPLOYMENT_NAME string = smallcompletionDeploymentModelName
-output AZURE_OPENAI_SMALL_COMPLETION_MODEL_VERSION string = smallcompletionModelVersion
+output AZURE_OPENAI_COMPLETION_MODEL_VERSION string = completionModelVersion
 output AZURE_OPENAI_EMBEDDING_MODEL string = embeddingModelName
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = embeddingDeploymentModelName
 output AZURE_AI_SEARCH_NAME string = search.outputs.searchName

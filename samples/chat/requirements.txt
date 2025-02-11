@@ -1,0 +1,9 @@
+autogen-agentchat==0.4.6
+azure.identity
+autogen-ext[openai,azure]
+python-dotenv
+azure-ai-projects
+aiohttp
+azure-search-documents
+langchain_openai
+langchain_community

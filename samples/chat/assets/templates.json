@@ -1,0 +1,182 @@
+[
+    {
+        "id": 1,
+        "topic": "Marketing",
+        "subject": "Exclusive Offer Just for You!",
+        "body": "Dear Customer, we have an exclusive offer just for you. Get 20% off on your next purchase. Hurry, offer ends soon!"
+    },
+    {
+        "id": 2,
+        "topic": "Marketing",
+        "subject": "New Arrivals in Our Store",
+        "body": "Check out the latest additions to our collection. Visit our store to explore new arrivals and enjoy special discounts."
+    },
+    {
+        "id": 3,
+        "topic": "Marketing",
+        "subject": "Limited Time Sale!",
+        "body": "Don't miss our limited time sale. Enjoy up to 50% off on selected items. Shop now and save big!"
+    },
+    {
+        "id": 4,
+        "topic": "Marketing",
+        "subject": "Refer a Friend and Earn Rewards",
+        "body": "Invite your friends to shop with us and earn rewards for each successful referral. Start sharing and earning today!"
+    },
+    {
+        "id": 5,
+        "topic": "Product Recall",
+        "subject": "Important Safety Recall Notice",
+        "body": "We are issuing a safety recall for the following product. Please stop using it immediately and contact our support team for further instructions."
+    },
+    {
+        "id": 6,
+        "topic": "Product Recall",
+        "subject": "Urgent: Product Recall Alert",
+        "body": "We regret to inform you that we are recalling a product due to safety concerns. Please visit our website for more details and return instructions."
+    },
+    {
+        "id": 7,
+        "topic": "Product Recall",
+        "subject": "Product Recall Notification",
+        "body": "This is to notify you of a product recall. Please discontinue use and follow the instructions provided to return the product for a full refund."
+    },
+    {
+        "id": 8,
+        "topic": "Product Recall",
+        "subject": "Recall Notice: Immediate Action Required",
+        "body": "We have identified a safety issue with one of our products. Please take immediate action to return the product. Contact our support for assistance."
+    },
+    {
+        "id": 9,
+        "topic": "Product Announcement",
+        "subject": "Introducing Our New Product Line",
+        "body": "We are excited to announce the launch of our new product line. Discover innovative features and enhanced performance. Available now!"
+    },
+    {
+        "id": 10,
+        "topic": "Product Announcement",
+        "subject": "New Product Launch",
+        "body": "Join us for the launch of our latest product. Experience cutting-edge technology and superior quality. Pre-order now and be the first to own it."
+    },
+    {
+        "id": 11,
+        "topic": "Product Announcement",
+        "subject": "Exciting New Product Release",
+        "body": "We are thrilled to unveil our newest product. Designed to meet your needs and exceed your expectations. Check it out today!"
+    },
+    {
+        "id": 12,
+        "topic": "Product Announcement",
+        "subject": "Product Update: New Features Added",
+        "body": "We have added new features to our existing product. Upgrade now to enjoy the latest enhancements and improved functionality."
+    },
+    {
+        "id": 13,
+        "topic": "Marketing",
+        "subject": "Seasonal Sale: Up to 40% Off",
+        "body": "Celebrate the season with our special sale. Enjoy up to 40% off on selected items. Limited time offer, shop now!"
+    },
+    {
+        "id": 14,
+        "topic": "Marketing",
+        "subject": "Join Our Loyalty Program",
+        "body": "Become a member of our loyalty program and enjoy exclusive benefits, discounts, and rewards. Sign up today and start saving!"
+    },
+    {
+        "id": 15,
+        "topic": "Marketing",
+        "subject": "Flash Sale: 24 Hours Only",
+        "body": "Don't miss our flash sale! For the next 24 hours, enjoy incredible discounts on a wide range of products. Shop now before it's too late!"
+    },
+    {
+        "id": 16,
+        "topic": "Product Recall",
+        "subject": "Recall Notice: Product Safety Issue",
+        "body": "We are recalling a product due to a safety issue. Please stop using it immediately and follow the return instructions for a full refund."
+    },
+    {
+        "id": 17,
+        "topic": "Product Recall",
+        "subject": "Important: Product Recall Information",
+        "body": "We have identified a potential safety risk with one of our products. Please return it as soon as possible. Visit our website for more details."
+    },
+    {
+        "id": 18,
+        "topic": "Product Announcement",
+        "subject": "New Product Available Now",
+        "body": "Our latest product is now available for purchase. Discover its amazing features and benefits. Order today and be among the first to own it."
+    },
+    {
+        "id": 19,
+        "topic": "Product Announcement",
+        "subject": "Product Launch Event",
+        "body": "Join us for an exclusive product launch event. Be the first to see our new product in action and enjoy special launch offers."
+    },
+    {
+        "id": 20,
+        "topic": "Product Announcement",
+        "subject": "New Product Release: Special Offer",
+        "body": "To celebrate the release of our new product, we are offering a special discount for a limited time. Don't miss out, order now!"
+    },
+    {
+        "id": 21,
+        "topic": "Product Announcement",
+        "subject": "Introducing Our New Hammer",
+        "body": "We are excited to announce the launch of our new hammer. Discover its innovative features and enhanced performance. Available now!"
+    },
+    {
+        "id": 22,
+        "topic": "Product Announcement",
+        "subject": "New Screwdriver Set Launch",
+        "body": "Join us for the launch of our latest screwdriver set. Experience cutting-edge technology and superior quality. Pre-order now and be the first to own it."
+    },
+    {
+        "id": 23,
+        "topic": "Product Announcement",
+        "subject": "Exciting New Drill Release",
+        "body": "We are thrilled to unveil our newest drill. Designed to meet your needs and exceed your expectations. Check it out today!"
+    },
+    {
+        "id": 24,
+        "topic": "Product Announcement",
+        "subject": "Product Update: New Wrench Features Added",
+        "body": "We have added new features to our existing wrench. Upgrade now to enjoy the latest enhancements and improved functionality."
+    },
+    {
+        "id": 25,
+        "topic": "Product Announcement",
+        "subject": "Introducing Our New Dog Food",
+        "body": "We are excited to announce the launch of our new dog food. Discover its innovative features and enhanced performance. Available now!"
+    },
+    {
+        "id": 26,
+        "topic": "Product Announcement",
+        "subject": "New Cat Toy Launch",
+        "body": "Join us for the launch of our latest cat toy. Experience cutting-edge technology and superior quality. Pre-order now and be the first to own it."
+    },
+    {
+        "id": 27,
+        "topic": "Product Announcement",
+        "subject": "Exciting New Bird Cage Release",
+        "body": "We are thrilled to unveil our newest bird cage. Designed to meet your needs and exceed your expectations. Check it out today!"
+    },
+    {
+        "id": 28,
+        "topic": "Product Announcement",
+        "subject": "Product Update: New Fish Tank Features Added",
+        "body": "We have added new features to our existing fish tank. Upgrade now to enjoy the latest enhancements and improved functionality."
+    },
+    {
+        "id": 29,
+        "topic": "Product Announcement",
+        "subject": "Introducing Our New Car Battery",
+        "body": "We are excited to announce the launch of our new car battery. Discover its innovative features and enhanced performance. Available now!"
+    },
+    {
+        "id": 30,
+        "topic": "Product Announcement",
+        "subject": "New Tire Launch",
+        "body": "Join us for the launch of our latest tire. Experience cutting-edge technology and superior quality. Pre-order now and be the first to own it."
+    }
+]
