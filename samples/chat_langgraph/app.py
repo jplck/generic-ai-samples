@@ -1,25 +1,10 @@
-import ast
+
 import os
-import sys
-import random
 from typing import Any, Dict, List, Literal, Annotated, TypedDict, cast
-from uuid import UUID
 import dotenv
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
-import tiktoken
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
-from IPython.display import Image
-from langchain.agents.agent import AgentAction
-from langchain_community.agent_toolkits import SQLDatabaseToolkit
-from langchain_community.utilities import SQLDatabase
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, BaseMessage
-from langchain_core.outputs import ChatGeneration
+from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_core.runnables import RunnableLambda, RunnableWithFallbacks
-from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
-from langchain_core.tools import tool, BaseTool
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
 from langgraph.prebuilt import ToolNode
@@ -30,10 +15,9 @@ from opentelemetry.instrumentation.langchain import LangchainInstrumentor
 from opentelemetry.sdk import trace as trace_sdk
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-import hashlib
-from langchain_core.documents import Document
-from langchain_community.vectorstores.azuresearch import AzureSearch
 from token_counter import TokenCounterCallback
+from langchain_core.tools import tool
+from llm import prepare_azure_openai_completion_model, prepare_azure_openai_embeddings_model
 
 dotenv.load_dotenv()
 
@@ -52,45 +36,7 @@ def setup_tracing():
 tracer = setup_tracing()
 
 callback = TokenCounterCallback()
-
-llm: AzureChatOpenAI = None
-if "AZURE_OPENAI_API_KEY" in os.environ:
-    llm = AzureChatOpenAI(
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-        azure_deployment=os.getenv("AZURE_OPENAI_COMPLETION_DEPLOYMENT_NAME"),
-        openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-        temperature=0,
-        streaming=True,
-        model_kwargs={"stream_options":{"include_usage": True}},
-        callbacks=[callback]
-    )
-    embeddings_model = AzureOpenAIEmbeddings(    
-        azure_deployment = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"),
-        openai_api_version = os.getenv("AZURE_OPENAI_API_VERSION"),
-        model= os.getenv("AZURE_OPENAI_EMBEDDING_MODEL"),
-        api_key=os.getenv("AZURE_OPENAI_API_KEY")
-    )
-
-else:
-    token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-    llm = AzureChatOpenAI(
-        azure_ad_token_provider=token_provider,
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_deployment=os.getenv("AZURE_OPENAI_COMPLETION_DEPLOYMENT_NAME"),
-        openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-        temperature=0,
-        openai_api_type="azure_ad",
-        streaming=True,
-        model_kwargs={"stream_options":{"include_usage": True}},
-        callbacks=[callback]
-    )
-    embeddings_model = AzureOpenAIEmbeddings(    
-        azure_deployment = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"),
-        openai_api_version = os.getenv("AZURE_OPENAI_API_VERSION"),
-        model= os.getenv("AZURE_OPENAI_EMBEDDING_MODEL"),
-        azure_ad_token_provider = token_provider
-    )
+llm = prepare_azure_openai_completion_model([callback])
 
 # Define the state for the agent
 class State(TypedDict):
