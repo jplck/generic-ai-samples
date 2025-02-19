@@ -96,6 +96,9 @@ module openai './ai/openai.bicep' = {
     name: !empty(openaiName) ? openaiName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     deployments: modelDeployments
     capacity: openaiCapacity
+    aiHubName: !empty(openaiName) ? '${openaiName}hub' : '${abbrs.cognitiveServicesAccounts}${resourceToken}-hub'
+    applicationInsightsId: monitoring.outputs.applicationInsightsId
+    storageAccountId: storage.outputs.storageAccountId
   }
 }
 module cosmodDb './core/data/cosmosdb.bicep' = {
@@ -129,7 +132,6 @@ module monitoring './core/monitor/monitoring.bicep' = {
     tags: tags
     logAnalyticsName: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
     applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${resourceToken}'
-    applicationInsightsDashboardName: !empty(applicationInsightsDashboardName) ? applicationInsightsDashboardName : '${abbrs.portalDashboards}${resourceToken}'
   }
 }
 
