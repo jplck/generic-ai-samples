@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Multi modal AI Showroom</title>
+    <!-- Include Pico.css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css" />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Import Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Use a modern sans-serif font -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Main Container -->
+    <main class="container">
+        <article>
+            <h1>Multi modal AI showroom</h1>
+            <h4>A minimal speech-to-structured output app built with Azure OpenAI Realtime API to discuss audio and images with a product showroom. <br/> Source code on <a href="https://github.com/Azure-Samples/on-the-road-copilot">GitHub</a></h4>
+            <button id="toggleButton" class="black-button">Start Conversation</button>
+            <!-- Updated Form -->
+            <div id="statusMessage"></div>
+            <div id="productList">
+                
+            </div>
+            <pre id="report"></pre>
+        </article>
+    </main>
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
