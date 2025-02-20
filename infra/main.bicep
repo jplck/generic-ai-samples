@@ -15,10 +15,6 @@ param containerAppsEnvironmentName string = ''
 param containerRegistryName string = ''
 param openaiName string = ''
 param storageAccountName string = ''
-param cosmosDbAccountName string = ''
-param cosmosDatabaseName string = 'financialagents'
-param cosmosContainerName string = 'documents'
-param applicationInsightsDashboardName string = ''
 param applicationInsightsName string = ''
 param logAnalyticsName string = ''
 
@@ -101,17 +97,6 @@ module openai './ai/openai.bicep' = {
     storageAccountId: storage.outputs.storageAccountId
   }
 }
-module cosmodDb './core/data/cosmosdb.bicep' = {
-  name: 'sql'
-  scope: resourceGroup
-  params: {
-    location: location
-    accountName: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${abbrs.cosmosDbAccount}${resourceToken}'
-    databaseName: cosmosDatabaseName
-    containerName: cosmosContainerName
-    tags: tags
-  }
-}
 
 module search './ai/search.bicep' = {
   name: 'search'
@@ -144,9 +129,6 @@ output APPLICATIONINSIGHTS_NAME string = monitoring.outputs.applicationInsightsN
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
-output COSMOSDB_ENDPOINT string = cosmodDb.outputs.endpoint
-output COSMOSDB_DATABASE_NAME string = cosmosDatabaseName
-output COSMOSDB_CONTAINER_NAME string = cosmosContainerName
 output AZURE_OPENAI_API_VERSION string = openaiApiVersion
 output AZURE_OPENAI_API_KEY string = openai.outputs.openaiKey
 output AZURE_OPENAI_ENDPOINT string = openai.outputs.openaiEndpoint
