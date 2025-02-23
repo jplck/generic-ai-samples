@@ -1,0 +1,122 @@
+[
+    {
+        "id": 1,
+        "name": "Modern Sofa",
+        "description": "A comfortable and stylish modern sofa.",
+        "price": 499.99
+    },
+    {
+        "id": 2,
+        "name": "Dining Table",
+        "description": "A large wooden dining table that seats six.",
+        "price": 299.99
+    },
+    {
+        "id": 3,
+        "name": "Office Chair",
+        "description": "An ergonomic office chair with adjustable height.",
+        "price": 149.99
+    },
+    {
+        "id": 4,
+        "name": "Bookshelf",
+        "description": "A tall bookshelf with five shelves.",
+        "price": 89.99
+    },
+    {
+        "id": 5,
+        "name": "Coffee Table",
+        "description": "A sleek glass coffee table.",
+        "price": 79.99
+    },
+    {
+        "id": 6,
+        "name": "Bed Frame",
+        "description": "A sturdy bed frame made of solid wood.",
+        "price": 399.99
+    },
+    {
+        "id": 7,
+        "name": "Wardrobe",
+        "description": "A spacious wardrobe with sliding doors.",
+        "price": 599.99
+    },
+    {
+        "id": 8,
+        "name": "TV Stand",
+        "description": "A modern TV stand with storage compartments.",
+        "price": 129.99
+    },
+    {
+        "id": 9,
+        "name": "Recliner Chair",
+        "description": "A comfortable recliner chair with footrest.",
+        "price": 199.99
+    },
+    {
+        "id": 10,
+        "name": "Nightstand",
+        "description": "A small nightstand with a drawer.",
+        "price": 49.99
+    },
+    {
+        "id": 11,
+        "name": "Dining Chair",
+        "description": "A set of four dining chairs with cushioned seats.",
+        "price": 199.99
+    },
+    {
+        "id": 12,
+        "name": "Desk",
+        "description": "A spacious desk with drawers and a keyboard tray.",
+        "price": 249.99
+    },
+    {
+        "id": 13,
+        "name": "Armchair",
+        "description": "A cozy armchair with a soft fabric cover.",
+        "price": 179.99
+    },
+    {
+        "id": 14,
+        "name": "Dresser",
+        "description": "A large dresser with six drawers.",
+        "price": 349.99
+    },
+    {
+        "id": 15,
+        "name": "Bar Stool",
+        "description": "A set of two bar stools with adjustable height.",
+        "price": 99.99
+    },
+    {
+        "id": 16,
+        "name": "Patio Set",
+        "description": "A patio set with a table and four chairs.",
+        "price": 399.99
+    },
+    {
+        "id": 17,
+        "name": "TV Cabinet",
+        "description": "A TV cabinet with glass doors and shelves.",
+        "price": 199.99
+    },
+    {
+        "id": 18,
+        "name": "Shoe Rack",
+        "description": "A compact shoe rack with multiple tiers.",
+        "price": 39.99
+    },
+    {
+        "id": 19,
+        "name": "Console Table",
+        "description": "A narrow console table with a drawer.",
+        "price": 89.99
+    },
+    {
+        "id": 20,
+        "name": "Storage Bench",
+        "description": "A storage bench with a cushioned seat.",
+        "price": 149.99
+    }
+]
