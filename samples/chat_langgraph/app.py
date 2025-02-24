@@ -22,6 +22,7 @@ from token_counter import TokenCounterCallback
 from langchain_core.tools import tool
 from langgraph.types import Command, interrupt
 from llm import prepare_azure_openai_completion_model, prepare_azure_openai_embeddings_model
+import uuid
 
 dotenv.load_dotenv()
 
@@ -61,19 +62,42 @@ class Route:
 @tool
 def product_search_tool(query: str) -> str:
     """
-    A tool that searches for prodcuts in a prodcut database and returns the results.
+    A tool that searches for furniture in a product database and returns the results.
+    :return: A list of product names and descriptions.
     """
     with open(Path(__file__).parent / "assets/products.json", "r", encoding="utf-8") as f:
         products = json.load(f)
     return products
 
+@tool
+def order_tool(order_details: str) -> str:
+    """
+    A tool that sends out product order orders and returns the shipping details.
+    Required order details are:
+    - User shipping address and user name
+    - User payment method
+    - User email address or phone number for SMS for shipping updates
+    - Product name and description + quantity
+    :return: The order confirmation number.
+    """
+    return str(uuid.uuid4())
+
 #-----------------------------------------------------------------------------------------------
 
 def product_search_agent(state: State) -> Command[Literal["order_agent", "human_input_agent", "product_search_tool"]]:
     prompt = """
-        Your are an expert providing information about available products(furniture). Use your tools to search for products.
-        If you find a product, return the product name and description. Ask the user if he is satisfied with the result by calling the human_input_agent.
-        If the user is not satisfied, ask for more details. If the user is satisfied, continue to the order_agent.
+        Your are an expert providing information about available furniture to purchase.
+
+        ONLY call your tool if you have no products in your context. Otherwise use your context.
+        
+        1. Search for a product based on the user input, using your tool.
+        2. If you find a product, return the product name and description.
+        3. Ask the user if he is satisfied with the result by calling the human_input_agent
+        4. If the user is not satisfied, ask for more details and call the products_search_tool again.
+        5. If the user is satisfied, continue to the order_agent.
+        6. If you don't find a product, ask the user if he wants to change his search.
+        7. If the user wants to change his search, return to step 1.
+
         Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
     """
 
@@ -89,23 +113,34 @@ workflow.add_node("product_search_tool", ToolNode([product_search_tool]))
 
 #-----------------------------------------------------------------------------------------------
 
-def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__", "product_search_agent"]]:
+def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__", "product_search_agent", "order_tool"]]:
     prompt = """
-    Your are an expert that orders products based on an input context. Ask the user to provide the order details by calling human_input_agent.
-    If the user or agent is satisfied with the order details, return the order details and call __end__.
-    If the user or agent is not satisfied, ask for more details.
-    if the user wants to revisit his search, call product_search_agent.
+    Your are an expert that prepares an order based on an input context.
+
+    Whenever you need user input, call the human_input_agent.
+
+    1. Gather user information by call the human_input_agent:
+    - User shipping address and user name
+    - User payment method
+    - User email address or phone number for SMS for shipping updates
+    2. Ask the user if he wants to proceed with the order.
+    3. If the user wants to proceed, call the order_tool to place the order. If the order is successful, return the order confirmation number and end the conversation by calling the __end__ agent.
+    4. If the user wants to revisit his search, call product_search_agent.
+    5. If the user wants to cancel, return END.
+    6. If the user wants to change his order, return to step 1.
+
     Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
     """
 
     prompt_template = ChatPromptTemplate.from_messages(
         [("system", prompt), ("placeholder", "{input}")]
     )
-    call = prompt_template | llm
+    call = prompt_template | llm.bind_tools([order_tool], tool_choice="auto")
     result = call.invoke({"input": state["messages"]})
     return generate_route(result)()
 
 workflow.add_node("order_agent", order_agent)
+workflow.add_node("order_tool", ToolNode([order_tool]))
 
 #-----------------------------------------------------------------------------------------------
 
@@ -150,10 +185,10 @@ def generate_route(result: AIMessage) -> Route:
 
 workflow.add_node("human_input_agent", human_input_agent)
 
-# Specify the edges between the nodes
 workflow.add_edge(START, "product_search_agent")
 
 workflow.add_edge("product_search_tool", "product_search_agent")
+workflow.add_edge("order_tool", "order_agent")
 workflow.add_edge("order_agent", END)
 
 graph = workflow.compile()

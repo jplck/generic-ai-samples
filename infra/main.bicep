@@ -22,14 +22,14 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName, 'app': 'ai-agents', 'tracing': 'yes' }
 param searchIndexName string = 'search-index'
-param completionDeploymentModelName string = 'gpt-4o-mini'
-param completionModelName string = 'gpt-4o-mini'
-param completionModelVersion string = '2024-07-18'
+param completionDeploymentModelName string = 'gpt-4o'
+param completionModelName string = 'gpt-4o'
+param completionModelVersion string = '2024-08-06'
 param embeddingDeploymentModelName string = 'text-embedding-ada-002'
 param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingModelVersion string = '2'
 param openaiApiVersion string = '2024-08-01-preview'
-param openaiCapacity int = 50
+param openaiCapacity int = 1
 param modelDeployments array = [
   {
     name: completionDeploymentModelName

@@ -28,7 +28,7 @@ param customDomainName string
 
 param deployments array
 
-resource account 'Microsoft.CognitiveServices/accounts@2022-10-01' = {
+resource account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: name  
   location: location
   tags: tags
@@ -45,7 +45,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2022-10-01' = {
 
 // Deployments for the Azure OpenAI service
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = [for deployment in deployments: {
   parent: account
   name: deployment.name
   sku: {
