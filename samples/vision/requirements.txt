@@ -1,0 +1,6 @@
+aiohttp==3.11.11
+aiohttp-sse==2.2.0
+azure-identity==1.19.0
+gunicorn==23.0.0
+openai==1.59.3
+python-dotenv==1.0.1
