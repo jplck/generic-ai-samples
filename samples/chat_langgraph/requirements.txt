@@ -21,3 +21,4 @@ openinference-instrumentation-langchain==0.1.29
 azure-search-documents==11.5.2
 ipython==8.26.0
 langgraph-cli[inmem]
+debugpy
