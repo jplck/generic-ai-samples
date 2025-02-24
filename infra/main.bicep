@@ -49,6 +49,22 @@ param modelDeployments array = [
   }
 ]
 
+param voiceDeploymentModelName string = 'gpt-4o-realtime-preview'
+param voiceModelName string = 'gpt-4o-realtime-preview'
+param voiceModelVersion string = '2024-10-01'
+param voiceDeployments array = [
+  {
+    name: voiceDeploymentModelName
+    skuName: 'GlobalStandard'
+    capacity: 1
+    model: {
+      format: 'OpenAI'      
+      name: voiceModelName
+      version: voiceModelVersion
+    }
+  }
+]
+
 // Organize resources in a resource group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
@@ -95,6 +111,7 @@ module openai './ai/openai.bicep' = {
     aiHubName: !empty(openaiName) ? '${openaiName}hub' : '${abbrs.cognitiveServicesAccounts}${resourceToken}-hub'
     applicationInsightsId: monitoring.outputs.applicationInsightsId
     storageAccountId: storage.outputs.storageAccountId
+    voiceDeployments: voiceDeployments
   }
 }
 
@@ -123,7 +140,8 @@ module monitoring './core/monitor/monitoring.bicep' = {
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
-
+output AZURE_VOICE_COMPLETION_DEPLOYMENT_NAME string = voiceDeploymentModelName
+output AZURE_VOICE_COMPLETION_MODEL string = voiceModelName
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
 output APPLICATIONINSIGHTS_NAME string = monitoring.outputs.applicationInsightsName
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName

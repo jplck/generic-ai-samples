@@ -28,105 +28,29 @@ class FileDBStore:
     
     async def show_product_information(self, args: Any) -> ToolResult:
         print("showing information")
+        print(args)
         information = {
-            "title": args["title"],
+            "name": args["name"],
             "text": args["text"],
             "image": args["image"]
         }
         # Return the result to the client
         return ToolResult(information, ToolResultDirection.TO_CLIENT)
-    
-    async def show_product_categories(self, args: Any) -> ToolResult:
-        print("showing product categories")
-
-        product_categories = []
-
-        for item in self.categories:
-            option = {}
-            option["title"] = item["title"]
-            option["text"] = item["text"]
-            option["image"] = item["image"]
-            product_categories.append(option)
-
-        # Return the result to the client
-        return ToolResult(product_categories, ToolResultDirection.TO_CLIENT)
-    
-    async def show_product_models(self, args: Any) -> ToolResult:
-        print("showing product models for ", args)
-
-        product_models = []
-
-        for item in self.categories:
-            if ("variations" in item):
-                for varation in item["variations"]:
-                    if ("products" in varation):
-                        # print(varation)
-                        for product in varation["products"]:
-                            print(product)
-                            option = {}
-                            option["title"] = product["title"]
-                            option["text"] = product["text"]
-                            option["image"] = product["image"]
-                            product_models.append(option)  
-        
-        # Return the result to the client
-        return ToolResult(product_models, ToolResultDirection.TO_CLIENT)
-    
-    async def get_available_categories(self, args: Any) -> ToolResult:
-        print("retreiving available categories", args)
-
-        responses = []
-        try:
-            for item in self.categories:
-                option = {}
-                option["category_description"] = item["description"]
-                option["image"] = item["image"]
-                option["text"] = item["text"]
-                option["category_name"] = item["category"]
-                option["question"] = item["question"]
-                responses.append(option)
-        except Exception as e:
-            print(e)
-            return ToolResult("Error", ToolResultDirection.TO_SERVER)
-        
-        return ToolResult(responses, ToolResultDirection.TO_SERVER)
-
-    async def get_products_by_category(self, args: Any) -> ToolResult:
-        category = args["category"].lower()
-        print("retreiving category: ", category)
-
+            
+    async def get_products(self, args: Any) -> ToolResult:
+        print("getting products")
+        print(args)
         responses = []
 
         for item in self.categories:
-            if (item["category"].lower() != category.lower().strip()):
-                continue
             option = {}
-            option["title"] = item["title"]
+            option["name"] = item["name"]
             option["description"] = item["description"]
             option["image"] = item["image"]
             option["text"] = item["text"]
             option["category"] = item["category"]
-            option["question"] = item["question"]
             responses.append(option)
 
-        return ToolResult(responses, ToolResultDirection.TO_SERVER)
-            
-    async def get_products(self, args: Any) -> ToolResult:
-        keywords = args["keywords"].lower().strip()
-        print("retreiving keywords: ", keywords)
-
-        responses = []
-
-        for item in self.categories:
-            for varation in item["variations"]:
-                if (varation["title"].lower() != keywords):
-                    continue
-                option = {}
-                option["name"] = varation["name"]
-                option["description"] = varation["description"]
-                option["image"] = varation["image"]
-                option["text"] = varation["text"]
-                option["category"] = item["category"]
-                responses.append(option)
+        print(responses)
 
         return ToolResult(responses, ToolResultDirection.TO_SERVER)

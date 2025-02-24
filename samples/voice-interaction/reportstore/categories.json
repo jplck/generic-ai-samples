@@ -1,131 +1,19 @@
 [
     {
         "id": "1",
-        "category": "ranges",
-        "title": "Ranges",
-        "image": "https://media.miele.com/images/2000017/200001787/20000178708.png",
-        "text": "Contoso Ranges: Style meets precision in every size!",
-        "question": "Are you looking for an all-in-one appliance that combines both a cooktop and an oven, or do you prefer to have separate units for cooking on the stovetop and baking or roasting in the oven?",
-        "description": "When it comes to ranges, Contoso offers you the style you want in the size you need. Full ranges and range tops available in 30-inch, 36-inch, and 48-inch widths, on top of three different fuel configurations… all-gas, induction, and dual-fuel. Contoso ranges offer the convenient controls, cooking options and delicious cooking results. ",
-        "variations": [
-            {
-                "id": "1",
-                "name": "Ranges",
-                "image": "https://media.miele.com/images/2000017/200001787/20000178710.png",
-                "text": "Your all-in-one culinary powerhouse: from stovetop to oven, a range handles it all.",
-                "description": "A range is a versatile kitchen appliance that combines a cooktop and an oven in a single unit, offering comprehensive cooking capabilities. It is particularly good for a wide variety of cooking tasks, from stovetop simmering, boiling, sautéing, and frying to baking, roasting, and broiling in the oven. The cooktop can feature gas, electric, or induction burners, each providing different levels of heat control and efficiency. The oven portion allows for baking and roasting, making a range ideal for preparing complete meals. Its multifunctionality makes it a central component of most kitchens, catering to diverse cooking needs."
-            },
-            {
-                "id": "2",
-                "name": "RangeTops",
-                "image": "https://media.miele.com/images/2000011/200001141/20000114152.png",
-                "text": "Elevate your kitchen design: rangetop precision meets flexible installation.",
-                "description": "A rangetop differs from a range in that it is solely the cooktop portion without an integrated oven. It is typically installed into a countertop or island and offers the same functionality as the cooktop on a range, with burners for tasks like boiling, simmering, sautéing, and frying. Rangetops are often favored in kitchens where a separate wall oven is installed, allowing for greater flexibility in kitchen design. They can provide a professional look and often come with high-end features, like precise temperature controls and specialized burners. In contrast, a range combines both the cooktop and oven in one unit, offering a complete cooking solution in a single appliance."
-            },
-            {
-                "id": "3",
-                "name": "RangeHoods",
-                "image": "https://media.miele.com/images/2000018/200001801/20000180147.png",
-                "text": "Cook with confidence: the range for culinary creation, the rangehood for clean air.",
-                "description": "A rangehood and a range serve distinct functions in the kitchen. A range is a cooking appliance that combines a cooktop and an oven, allowing you to perform a variety of cooking tasks such as boiling, frying, baking, and roasting. It is the central unit where food preparation and cooking occur. In contrast, a rangehood is a ventilation device installed above the cooktop or range. Its purpose is to remove smoke, steam, grease, odors, and heat generated during cooking. By using a fan, it either vents the air outside or filters and recirculates it back into the kitchen. In summary, a range is used for cooking, while a rangehood is used for ventilation, ensuring a cleaner and more comfortable cooking environment."
-            }
-        ]
+        "category": "car",
+        "name": "Nissan Leaf",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/2011_Nissan_Leaf_SL_--_10-28-2011.jpg/320px-2011_Nissan_Leaf_SL_--_10-28-2011.jpg",
+        "text": "The Nissan Leaf stylized as LEAF, is a battery-electric powered compact car manufactured by Nissan, produced since 2010 across two generations. It has been offered exclusively as a 5-door hatchback. The term LEAF serves as a backronym to leading environmentally-friendly affordable family car.",
+        "description": "The Nissan Leaf is a battery-electric powered compact car manufactured by Nissan, produced since 2010 across two generations. It has been offered exclusively as a 5-door hatchback. The term LEAF serves as a backronym to leading environmentally-friendly affordable family car."
     },
     {
         "id": "2",
-        "category": "oven",
-        "title": "Oven",
-        "question": "Do you primarily focus on baking and roasting and prefer a dedicated oven for those tasks, or are you looking for a combination appliance that includes both stovetop cooking and oven capabilities?",
-        "image": "https://media.miele.com/images/2000017/200001787/20000178727.png",
-        "text": "Contoso ovens: versatile solutions for every kitchen and culinary style.",
-        "description": "Built-in ovens placed independently of the cooktop for greater installation flexibility, steam ovens well-suited for delicious healthy meals, and combination ovens that bring cooking techniques together. We have a Contoso oven for every type of kitchen and chef.",
-        "variations": [
-            {
-                "id": "1",
-                "name": "Combi-steam",
-                "image": "https://media.miele.com/images/2000016/200001600/20000160041.png",
-                "text": "Master culinary perfection with the combi steam oven: where moisture meets mastery!",
-                "description": "A combi steam oven is a versatile kitchen appliance that combines the functions of a convection oven with steam cooking. It is particularly good for a variety of cooking tasks due to its ability to maintain moisture and enhance flavors. The steam function is excellent for baking bread with a perfect crust, cooking meats that are juicy and tender, and steaming vegetables to preserve nutrients and color. The convection feature allows for even cooking and browning, making it suitable for roasting and baking. This combination of steam and convection makes combi steam ovens ideal for achieving professional-quality results at home across a wide range of dishes."
-            },
-            {
-                "id": "2",
-                "name": "Convection",
-                "image": "https://media.miele.com/images/2000017/200001787/20000178722.png",
-                "text": "Unlock culinary excellence: Steam and convection in perfect harmony!",
-                "description": "A convection steam oven is a versatile appliance that combines convection heating with steam cooking to enhance culinary results. It is particularly good for baking, roasting, and reheating, as the steam helps maintain moisture, ensuring foods like bread have a crisp crust and tender interior, and meats remain juicy. The convection feature ensures even heat distribution, promoting uniform cooking and browning. This combination makes the oven ideal for a variety of tasks, from baking pastries and roasting vegetables to steaming fish and reheating leftovers without drying them out."
-            },
-            {
-                "id": "3",
-                "name": "Speed",
-                "image": "https://media.miele.com/images/2000017/200001772/20000177279.png",
-                "text": "Fast, flavorful, and fresh: Speed steam oven magic!",
-                "description": "A speed steam oven is designed to cook food quickly while preserving moisture and enhancing flavors. It combines the benefits of steam cooking with rapid heating technologies, such as microwave or convection, to significantly reduce cooking times. This makes it ideal for preparing meals efficiently without sacrificing quality. It's particularly useful for busy kitchens, allowing for quick preparation of dishes like steamed vegetables, reheated leftovers, and baked goods, all while maintaining optimal texture and taste. The speed steam oven is perfect for those who need to prepare meals in a hurry but still want the benefits of steam cooking."
-            },
-            {
-                "id": "4",
-                "name": "Microwave",
-                "image": "https://media.miele.com/images/2000015/200001542/20000154273.png",
-                "text": "Quick & convenient: Microwave your way to mealtime magic!",
-                "description": "A microwave is an efficient kitchen appliance known for its ability to quickly heat and cook food using microwave radiation. It is particularly good for reheating leftovers, defrosting frozen items, and cooking simple meals or snacks. Microwaves are also useful for tasks like boiling water, melting butter or chocolate, and steaming vegetables. Their speed and convenience make them ideal for busy households, providing a fast way to prepare food without the need for extensive cooking skills or time.",
-                "products" : [
-                    {
-                        "id": "1",
-                        "title": "H 7240 BM",
-                        "text": "with a seamless design, automatic programmes and combination modes.",
-                        "image": "https://media.miele.com/images/2000015/200001502/20000150258.png",
-                        "colors": "Stainless steel",
-                        "features": "Touch display with movement sensor"
-                    },
-                    {
-                        "id": "2",
-                        "title": "H 7640 BM",
-                        "text": "with a seamless design, automatic programmes and food probe",
-                        "image": "https://media.miele.com/images/2000015/200001502/20000150258.png",
-                        "colors": "Stainless steel",
-                        "features": "Clear text display with sensor controls "
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "3",
-        "category": "cooktop",
-        "title": "Cooktop",
-        "question": "Do you prefer having just a stovetop for tasks like boiling, frying, and sautéing, with the flexibility to place the oven separately, or are you looking for an all-in-one solution that combines both stovetop and baking capabilities?",
-        "image": "https://media.miele.com/images/2000015/200001576/20000157626.png",
-        "text": "Stovetop simplicity or all-in-one efficiency: What's your kitchen style?",
-        "description": "Designed to be installed independently or perfectly fit with existing elements; our induction, electric and gas cooktops, and also our combisets perfectly complement your personal taste and usage.",
-        "variations": [
-            {
-                "id": "1",
-                "name": "Induction",
-                "image": "https://media.miele.com/images/2000016/200001600/20000160041.png",
-                "text": "Elevate every dish: Steam and convection unite in culinary harmony!",
-                "description": "A combi steam oven is a versatile kitchen appliance that combines the functions of a convection oven with steam cooking. It is particularly good for a variety of cooking tasks due to its ability to maintain moisture and enhance flavors. The steam function is excellent for baking bread with a perfect crust, cooking meats that are juicy and tender, and steaming vegetables to preserve nutrients and color. The convection feature allows for even cooking and browning, making it suitable for roasting and baking. This combination of steam and convection makes combi steam ovens ideal for achieving professional-quality results at home across a wide range of dishes."
-            },
-            {
-                "id": "2",
-                "name": "Electric",
-                "image": "https://media.miele.com/images/2000017/200001787/20000178722.png",
-                "text": "Culinary perfection: Steam and convection, redefined!",
-                "description": "A convection steam oven is a versatile appliance that combines convection heating with steam cooking to enhance culinary results. It is particularly good for baking, roasting, and reheating, as the steam helps maintain moisture, ensuring foods like bread have a crisp crust and tender interior, and meats remain juicy. The convection feature ensures even heat distribution, promoting uniform cooking and browning. This combination makes the oven ideal for a variety of tasks, from baking pastries and roasting vegetables to steaming fish and reheating leftovers without drying them out."
-            },
-            {
-                "id": "3",
-                "name": "Gas",
-                "image": "https://media.miele.com/images/2000017/200001772/20000177279.png",
-                "text": "Fast, flavorful feasts: Speed steam oven delivers!",
-                "description": "A speed steam oven is designed to cook food quickly while preserving moisture and enhancing flavors. It combines the benefits of steam cooking with rapid heating technologies, such as microwave or convection, to significantly reduce cooking times. This makes it ideal for preparing meals efficiently without sacrificing quality. It's particularly useful for busy kitchens, allowing for quick preparation of dishes like steamed vegetables, reheated leftovers, and baked goods, all while maintaining optimal texture and taste. The speed steam oven is perfect for those who need to prepare meals in a hurry but still want the benefits of steam cooking."
-            },
-            {
-                "id": "4",
-                "name": "CombiSets",
-                "image": "https://media.miele.com/images/2000015/200001542/20000154273.png",
-                "text": "Zap your way to quick and easy meals!",
-                "description": "A microwave is an efficient kitchen appliance known for its ability to quickly heat and cook food using microwave radiation. It is particularly good for reheating leftovers, defrosting frozen items, and cooking simple meals or snacks. Microwaves are also useful for tasks like boiling water, melting butter or chocolate, and steaming vegetables. Their speed and convenience make them ideal for busy households, providing a fast way to prepare food without the need for extensive cooking skills or time."
-            }
-        ]
+        "category": "car",
+        "name": "Toyota Corolla",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/2019_Toyota_Corolla_Icon_Tech_VVT-i_Hybrid_1.8.jpg/320px-2019_Toyota_Corolla_Icon_Tech_VVT-i_Hybrid_1.8.jpg",
+        "text": "The Toyota Corolla, which has been in production since 1966, is the best-selling series of automobile of all time.",
+        "description": "The Toyota Corolla, which has been in production since 1966, is the best-selling series of automobile of all time."
     }
 ]
 

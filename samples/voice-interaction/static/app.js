@@ -155,27 +155,12 @@ function handleWebSocketMessage(message) {
             // Handle tool response
             if (message.tool_name === 'show_product_information') {
                 const information = JSON.parse(message.tool_result);
-                console.log('Showing product information:', information);
-                var layout = '<div class="product"><h3>' + information.title + '</h3><img src="'+ information.image + '" /><p>' + information.text + '</p></div>'
+                console.log('Showing information:', information);
+                var layout = '<div class="product"><h3>' + information.name + '</h3><img src="'+ information.image + '" /><p>' + information.text + '</p></div>'
                 productListDiv.innerHTML = layout;
             }
-            if (message.tool_name === 'show_product_categories') {
-                const information = JSON.parse(message.tool_result);
-                console.log('Showing product categories:', information);
-                productListDiv.innerHTML = '';
-                for (var i = 0; i < information.length; i++) {
-                    var layout = '<div class="product"><h3>' + information[i].title + '</h3><img src="'+ information[i].image + '" /><p>' + information[i].text + '</p></div>'
-                    productListDiv.innerHTML += layout;
-                }
-            }
-            if (message.tool_name === 'show_product_models') {
-                const information = JSON.parse(message.tool_result);
-                console.log('Showing product models:', information);
-                productListDiv.innerHTML = '';
-                for (var i = 0; i < information.length; i++) {
-                    var layout = '<div class="product"><h3>' + information[i].title + '</h3><img src="'+ information[i].image + '" /><p>' + information[i].text + '</p></div>'
-                    productListDiv.innerHTML += layout;
-                }
+            if (message.tool_name === 'get_products') {
+                console.log('Showing products:');
             }
             break;
         case 'error':
