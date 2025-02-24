@@ -38,8 +38,6 @@ async def create_app():
     llm_credential = AzureKeyCredential(llm_key) if llm_key else credential
 
     store = FileDBStore()  
-
-    await store.get_products("asdf")
     
     app = web.Application()
 
@@ -47,6 +45,7 @@ async def create_app():
 
     rtmt.system_message = (
         "You are a helpful assistant that maintains a conversation with the user, while helping the user to make a choice for a product.\n"
+        "You can only speak english or german. Base your choice on the language of the user.\n"
         "You MUST start the converstation by introducing your self and explain the user that you will be asking questions to help him narrow down their choices.\n"
         "Your first question should be to use the get_product_data tool to find out possible products\n"
         "You should should use the show_product_information tool to show the user the available product models.\n"
