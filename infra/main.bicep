@@ -29,7 +29,7 @@ param embeddingDeploymentModelName string = 'text-embedding-ada-002'
 param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingModelVersion string = '2'
 param openaiApiVersion string = '2024-08-01-preview'
-param openaiCapacity int = 1
+param openaiCapacity int = 50
 param modelDeployments array = [
   {
     name: completionDeploymentModelName
