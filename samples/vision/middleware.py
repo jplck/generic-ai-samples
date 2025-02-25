@@ -1,11 +1,12 @@
 import json
 import requests
-
+import base64
+from io import BytesIO
+from mimetypes import guess_type
 from typing import Any, Callable, Optional
 from aiohttp import web
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from azure.core.credentials import AzureKeyCredential
 from imagelibrary import VectorDatabase
+from openai import AzureOpenAI
 
 class Middleware:
     endpoint: str
@@ -13,30 +14,33 @@ class Middleware:
     key: Optional[str] = None
     cv_endpoint: Optional[str] = None
     cv_key: Optional[str] = None    
+    client: AzureOpenAI = None
 
-    # Server-enforced configuration, if set, these will override the client's configuration
-    # Typically at least the model name and system message will be set by the server
-    model: Optional[str] = None
-    system_message: Optional[str] = None
-    temperature: Optional[float] = None
-    max_tokens: Optional[int] = None
-    disable_audio: Optional[bool] = None
-
-    _tools_pending = {}
-    _token_provider = None
-
-    def __init__(self, endpoint: str, deployment: str, cv_endpoint: str, cv_key: str, credentials: AzureKeyCredential | DefaultAzureCredential):
+    def __init__(self, client: AzureOpenAI, endpoint: str, deployment: str, cv_endpoint: str, cv_key: str):
         self.endpoint = endpoint
         self.deployment = deployment
         self.cv_endpoint = cv_endpoint
         self.cv_key = cv_key
+        self.client = client
 
-        if isinstance(credentials, AzureKeyCredential):
-            self.key = credentials.key
-        else:
-            self._token_provider = get_bearer_token_provider(credentials, "https://cognitiveservices.azure.com/.default")
-            self._token_provider() # Warm up during startup so we have a token cached when the first request arrives
+        print("Middleware initialized")
+        print(f"Endpoint: {self.endpoint}")
+        print(f"Deployment: {self.deployment}")
+        print(f"CV Endpoint: {self.cv_endpoint}")
 
+    # Function to encode a local image into data URL 
+    def local_image_to_data_url(self, image_path):
+        # Guess the MIME type of the image based on the file extension
+        mime_type, _ = guess_type(image_path)
+        if mime_type is None:
+            mime_type = 'application/octet-stream'  # Default MIME type if none is found
+
+        # Read and encode the image file
+        with open(image_path, "rb") as image_file:
+            base64_encoded_data = base64.b64encode(image_file.read()).decode('utf-8')
+
+        # Construct the data URL
+        return f"data:{mime_type};base64,{base64_encoded_data}"
 
     def image_embedding_with_url(self, imageurl):
         """
@@ -115,15 +119,61 @@ class Middleware:
         details = await request.json()
         # print(details)
         vector = json.loads(details["vector"])
+        if (not vector):
+            return web.Response(status=400, text="Vector field missing")
         # print("Search vector:", vector)
         print(len(vector))
         database = VectorDatabase()
         results = database.search(vector)
         print("Search results:", results)
         return web.json_response(results)
+    
+    async def _look_at_pictures(self, request):
+        print("_look_at_pictures handler")
+        details = await request.json()
+        picture1 = details["picture1"]
+        picture2 = details["picture2"]
+
+        picture1_url = self.local_image_to_data_url(picture1)
+        picture2_url = self.local_image_to_data_url(picture2)
+
+        prompt = f"Look at these two pictures. Image 1 and Image 2. Are they similar List all the differences according to category, color, position and size."
+
+        response = self.client.chat.completions.create(
+            model=self.deployment,
+            messages=[
+                { "role": "system", "content": "You are a helpful assistant." },
+                { "role": "user", "content": [  
+                    { 
+                        "type": "text", 
+                        "text": prompt 
+                    },
+                    { 
+                        "type": "image_url",
+                        "image_url": {
+                            "url": picture1_url
+                        }
+                    },
+                    { 
+                        "type": "image_url",
+                        "image_url": {
+                            "url": picture2_url
+                        }
+                    }
+                  ] 
+                } 
+            ],
+            max_tokens=2000 
+        )
+        comparison = response.choices[0].message.content
+        print(comparison)
+        return web.json_response(comparison)
 
     def attach_embedding_to_app(self, app, path):
         app.router.add_post(path, self._create_embedding_handler)
 
     def attach_search_to_app(self, app, path):
         app.router.add_post(path, self._search_images)
+
+    def attach_vision_to_app(self, app, path):
+        app.router.add_post(path, self._look_at_pictures)

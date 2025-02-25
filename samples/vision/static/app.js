@@ -3,6 +3,8 @@ const submitButton = document.getElementById("submit");
 const vector = document.getElementById("vector");
 submitButton.addEventListener('click', onSubmitButton);
 const imageResults = document.getElementById("imageResults");
+const visionButton = document.getElementById("vision");
+visionButton.addEventListener('click', onVisionButton);
 
 function onSubmitButton() {
     if (fileUpload.files.length == 0) {
@@ -57,4 +59,29 @@ function onSearchButton() {
         console.error('Error:', error);
         imageResults.textContent = "Failed to create call"
     });
+}
+
+
+function onVisionButton() {
+  const imageDetails = {
+      picture1 : "images/2016-BMW-i3-94Ah-Protonic-Blue-33-kWh-Elektroauto-17.jpg",
+      picture2 : "images/bmw-i3-ev_01.jpg"
+  };
+
+  fetch('/vision', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(imageDetails)
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log('Success:', data);
+      visionResults.textContent = data;
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      visionResults.textContent = "Failed to create call"
+  });
 }
