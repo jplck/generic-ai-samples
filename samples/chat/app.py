@@ -17,13 +17,15 @@ from azure.identity import DefaultAzureCredential
 dotenv.load_dotenv()
 
 DOCUMENT_INDEX_NAME = "document-index"
+api_key = os.getenv("AZURE_SEARCH_API_KEY")
 
 completion_model_client = AzureOpenAIChatCompletionClient(
     azure_deployment=os.getenv("AZURE_OPENAI_COMPLETION_DEPLOYMENT_NAME"),
     model=os.getenv("AZURE_OPENAI_COMPLETION_MODEL"),
     api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    azure_ad_token_provider=get_default_token_provider(),
+    api_key=api_key if api_key else None,
+    azure_ad_token_provider=get_default_token_provider() if not api_key else None,
     model_info={
         "json_output": False,
         "function_calling": True,
