@@ -4,11 +4,39 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+         {
+            "name": "Python Debugger: Chat app.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "samples.chat.app",
+            "console": "integratedTerminal"
+        },
         {
-            "name": "Python Debugger: app.py",
+            "name": "Python Debugger: Ingestion-Pipelines app.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "samples.ingestion-pipeline.app",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Chat Langgraph app.py",
             "type": "debugpy",
             "request": "launch",
             "module": "samples.chat_langgraph.app",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Vision app.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "samples.vision.app",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Voice Interaction app.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "samples.voice-interaction.app",
             "console": "integratedTerminal"
         },
         {

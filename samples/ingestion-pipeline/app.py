@@ -35,7 +35,7 @@ chunking_enabled = os.getenv("CHUNKING_ENABLED", "false").lower() == "true"
 
 embeddings_model = AzureOpenAIEmbeddings(    
     azure_deployment = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"),
-    openai_api_version = os.getenv("AZURE_OPENAI_VERSION"),
+    openai_api_version = os.getenv("AZURE_OPENAI_API_VERSION"),
     model= os.getenv("AZURE_OPENAI_EMBEDDING_MODEL"),
     api_key=os.getenv("AZURE_OPENAI_API_KEY")
 )
