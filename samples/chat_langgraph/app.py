@@ -115,19 +115,19 @@ workflow.add_node("product_search_tool", ToolNode([product_search_tool]))
 
 def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__", "product_search_agent", "order_tool"]]:
     prompt = """
-    Your are an expert that prepares an order based on an input context.
-
-    Whenever you need user input, call the human_input_agent.
-
-    1. Gather user information by call the human_input_agent:
+    Your are an expert that prepares an order based on an input context. 
+    Do not call your order_tool before you have all the information in your context.
+    
+    Call the human_input_agent agent to gather user input.
     - User shipping address and user name
     - User payment method
     - User email address or phone number for SMS for shipping updates
-    2. Ask the user if he wants to proceed with the order.
-    3. If the user wants to proceed, call the order_tool to place the order. If the order is successful, return the order confirmation number and end the conversation by calling the __end__ agent.
-    4. If the user wants to revisit his search, call product_search_agent.
-    5. If the user wants to cancel, return END.
-    6. If the user wants to change his order, return to step 1.
+
+    1. Ask the user if he wants to proceed with the order.
+    2. If the user wants to proceed, call the order_tool to place the order. If the order is successful, return the order confirmation number and end the conversation by calling the __end__ agent.
+    3. If the user wants to revisit his search, call product_search_agent.
+    4. If the user wants to cancel, return END.
+    5. If the user wants to change his order, return to step 1.
 
     Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
     """
