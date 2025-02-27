@@ -72,12 +72,7 @@ def product_search_tool(query: str) -> str:
 @tool
 def order_tool(order_details: str) -> str:
     """
-    A tool that sends out product order orders and returns the shipping details.
-    Required order details are:
-    - User shipping address and user name
-    - User payment method
-    - User email address or phone number for SMS for shipping updates
-    - Product name and description + quantity
+    A tool that sends out orders and returns the shipping details.
     :return: The order confirmation number.
     """
     return str(uuid.uuid4())
@@ -90,15 +85,17 @@ def product_search_agent(state: State) -> Command[Literal["order_agent", "human_
 
         ONLY call your tool if you have no products in your context. Otherwise use your context.
         
-        1. Search for a product based on the user input, using your tool.
-        2. If you find a product, return the product name and description.
-        3. Ask the user if he is satisfied with the result by calling the human_input_agent
-        4. If the user is not satisfied, ask for more details and call the products_search_tool again.
-        5. If the user is satisfied, continue to the order_agent.
-        6. If you don't find a product, ask the user if he wants to change his search.
-        7. If the user wants to change his search, return to step 1.
+        Search for a product based on the user input, using your tool.
 
-        Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
+        If you find products, return the product names and descriptions.
+
+        Ask the user if he is satisfied with the result by calling the human_input_agent
+
+        If the user is not satisfied, ask for more details and call the products_search_tool again.
+
+        If the user is satisfied, continue to the order_agent.
+
+        If you don't find a product, ask the user if he wants to change his search.
     """
 
     prompt_template = ChatPromptTemplate.from_messages(
@@ -106,7 +103,7 @@ def product_search_agent(state: State) -> Command[Literal["order_agent", "human_
     )
     call = prompt_template | llm.bind_tools([product_search_tool], tool_choice="auto")
     result = call.invoke({"input": state["messages"]})
-    return generate_route(result)()
+    return generate_route(result, prompt)()
 
 workflow.add_node("product_search_agent", product_search_agent)
 workflow.add_node("product_search_tool", ToolNode([product_search_tool]))
@@ -115,21 +112,23 @@ workflow.add_node("product_search_tool", ToolNode([product_search_tool]))
 
 def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__", "product_search_agent", "order_tool"]]:
     prompt = """
-    Your are an expert that prepares an order based on an input context.
+    Your are an expert that helps the user to place an order for a product.
 
-    Whenever you need user input, call the human_input_agent.
-
-    1. Gather user information by call the human_input_agent:
+    Gather user information by calling the human_input_agent if not available in your context.
+    You need the following information:
     - User shipping address and user name
     - User payment method
     - User email address or phone number for SMS for shipping updates
-    2. Ask the user if he wants to proceed with the order.
-    3. If the user wants to proceed, call the order_tool to place the order. If the order is successful, return the order confirmation number and end the conversation by calling the __end__ agent.
-    4. If the user wants to revisit his search, call product_search_agent.
-    5. If the user wants to cancel, return END.
-    6. If the user wants to change his order, return to step 1.
+    - Quantity of the product
 
-    Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
+    If you have all the info, ask the user if he wants to proceed with the order.
+    If the user wants to proceed, call the order_tool to place the order. If the order is successful, return the order confirmation number and end the conversation by calling the __end__ agent.
+    
+    If the user wants to revisit his search, call product_search_agent.
+    
+    If the user wants to cancel, return END.
+    
+    If the user wants to change his order, return to step 1.
     """
 
     prompt_template = ChatPromptTemplate.from_messages(
@@ -137,7 +136,7 @@ def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__",
     )
     call = prompt_template | llm.bind_tools([order_tool], tool_choice="auto")
     result = call.invoke({"input": state["messages"]})
-    return generate_route(result)()
+    return generate_route(result, prompt)()
 
 workflow.add_node("order_agent", order_agent)
 workflow.add_node("order_tool", ToolNode([order_tool]))
@@ -171,15 +170,29 @@ def human_input_agent(
         goto=active_agent,
     )  
 
-def generate_route(result: AIMessage) -> Route:
+def plan(message: str, agent_prompt: str) -> str:
+    prompt = """
+    You are an expert, that takes an input message and an agent prompt and returns the next agent to call.
+    You are given the following input message:
+    {input}
+    You are given the following agent prompt:
+    {agent_prompt}
+    """
+    prompt_template = ChatPromptTemplate.from_messages(
+        [("system", prompt), ("placeholder", "{input}")]
+    )
+    call = prompt_template | llm
+    result = call.invoke({"input": [message], "agent_prompt": agent_prompt})
+    return result.content
+
+def generate_route(result: AIMessage, agent_prompt: str) -> Route:
     update = {"messages": [result]}
-    if not result.tool_calls:
-        agent_name = result.content.split("call: ")[-1]
-        #Return END if no agent name is provided
-        goto = agent_name if agent_name else END
-    else:
+    goto = [END]
+    if result.tool_calls:
         tool_calls = result.additional_kwargs["tool_calls"]
         goto=[call["function"]["name"] for call in tool_calls]
+    elif type(result) == AIMessage:
+        goto = [plan(result.content, agent_prompt)]
 
     return Route(update, goto=goto)
 
