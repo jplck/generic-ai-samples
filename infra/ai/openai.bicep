@@ -1,7 +1,6 @@
 param name string
 param location string
 param tags object = {}
-param capacity int
 @description('AI hub name')
 param aiHubName string
 
@@ -25,9 +24,7 @@ param sku object = {
 }
 
 param customDomainName string
-
 param deployments array
-param voiceDeployments array
 
 resource account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: name  
@@ -50,20 +47,6 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01
   parent: account
   name: deployment.name
   sku: {
-    name: 'Standard'
-    capacity: capacity
-  }
-  properties: {
-    model: deployment.model
-  }
-}]
-
-// Voice Deployments for the Azure OpenAI service
-@batchSize(1)
-resource voiceDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in voiceDeployments: {
-  parent: account
-  name: deployment.name
-  sku: {
     name: deployment.skuName
     capacity: deployment.capacity
   }
@@ -71,7 +54,6 @@ resource voiceDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
     model: deployment.model
   }
 }]
-
 
 resource aiHub 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview' = {
   name: aiHubName

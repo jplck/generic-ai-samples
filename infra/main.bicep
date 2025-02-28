@@ -30,9 +30,15 @@ param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingModelVersion string = '2'
 param openaiApiVersion string = '2024-08-01-preview'
 param openaiCapacity int = 50
+param voiceDeploymentModelName string = 'gpt-4o-realtime-preview'
+param voiceModelName string = 'gpt-4o-realtime-preview'
+param voiceModelVersion string = '2024-10-01'
+
 param modelDeployments array = [
   {
     name: completionDeploymentModelName
+    skuName: 'Standard'
+    capacity: openaiCapacity
     model: {
       format: 'OpenAI'
       name: completionModelName
@@ -41,18 +47,14 @@ param modelDeployments array = [
   }
   {
     name: embeddingDeploymentModelName
+    skuName: 'Standard'
+    capacity: openaiCapacity
     model: {
       format: 'OpenAI'
       name: embeddingModelName
       version: embeddingModelVersion
     }
   }
-]
-
-param voiceDeploymentModelName string = 'gpt-4o-realtime-preview'
-param voiceModelName string = 'gpt-4o-realtime-preview'
-param voiceModelVersion string = '2024-10-01'
-param voiceDeployments array = [
   {
     name: voiceDeploymentModelName
     skuName: 'GlobalStandard'
@@ -107,11 +109,9 @@ module openai './ai/openai.bicep' = {
     customDomainName: !empty(openaiName) ? openaiName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     name: !empty(openaiName) ? openaiName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     deployments: modelDeployments
-    capacity: openaiCapacity
     aiHubName: !empty(openaiName) ? '${openaiName}hub' : '${abbrs.cognitiveServicesAccounts}${resourceToken}-hub'
     applicationInsightsId: monitoring.outputs.applicationInsightsId
     storageAccountId: storage.outputs.storageAccountId
-    voiceDeployments: voiceDeployments
   }
 }
 
@@ -142,6 +142,7 @@ output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 output AZURE_VOICE_COMPLETION_DEPLOYMENT_NAME string = voiceDeploymentModelName
 output AZURE_VOICE_COMPLETION_MODEL string = voiceModelName
+output AZURE_VOICE_COMPLETION_MODEL_VERSION string = voiceModelVersion
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
 output APPLICATIONINSIGHTS_NAME string = monitoring.outputs.applicationInsightsName
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
