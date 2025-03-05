@@ -23,6 +23,7 @@ from langchain_core.tools import tool
 from langgraph.types import Command, interrupt
 from llm import prepare_azure_openai_completion_model, prepare_azure_openai_embeddings_model
 import uuid
+import math
 
 dotenv.load_dotenv()
 
@@ -42,6 +43,7 @@ tracer = setup_tracing()
 
 callback = TokenCounterCallback()
 llm = prepare_azure_openai_completion_model([callback])
+embedding_model = prepare_azure_openai_embeddings_model()
 
 # Define the state for the agent
 class State(TypedDict):
@@ -58,6 +60,63 @@ class Route:
         return Command(update=self.data, goto=self.goto)
 
 #-----------------------------------------------------------------------------------------------
+
+class AgentDefinition(TypedDict):
+    name: str
+    func: Any
+    description: str
+    vector: List[float]
+    score: float
+    targets: List[str]
+
+class agent_library():
+    def __init__(self, embedding_model):
+        self.embedding_model = embedding_model
+        self.agents: List[AgentDefinition] = []
+
+    def add_agent(self, name, targets=[]):
+        def decorator(func):	
+            description = func.__doc__
+            if description is None:
+                raise ValueError("Agent function must have a docstring.")
+            agent_def = AgentDefinition(name=name, func=func, description=description, vector=self._embed(description), targets=targets)
+            self.agents.append(agent_def)
+            return func
+        return decorator
+
+    def get_agent(self, name):
+        return self.agents[name]
+    
+    def search_agents(self, query, k=5, score_threshold=0.5) -> List[AgentDefinition]:
+        query_vector = self._embed(query)
+        results = []
+        for agent in self.agents:
+            if agent["name"] in agent.filters or not agent.filters:
+                distance = self._cosine_distance(agent["vector"], query_vector)
+                if distance >= score_threshold:
+                    results.append(agent)
+        return sorted(results, key=lambda x: x["score"], reverse=True)[:k]
+
+    def _cosine_distance(a, b):
+        if len(a) != len(b):
+            raise ValueError("Vectors must be the same length.")
+
+        dot_product = sum(x * y for x, y in zip(a, b))
+        norm_a = math.sqrt(sum(x * x for x in a))
+        norm_b = math.sqrt(sum(y * y for y in b))
+
+        # Cosine similarity
+        cos_sim = dot_product / (norm_a * norm_b)
+
+        # Cosine distance
+        return 1.0 - cos_sim
+
+    def _embed(self, text):
+        if self.embedding_model is None:
+            raise ValueError("No embedding model provided.")
+        return self.embedding_model.embed_query(text)
+
+library = agent_library(embedding_model)
 
 @tool
 def product_search_tool(query: str) -> str:
@@ -82,14 +141,25 @@ def order_tool(order_details: str) -> str:
     """
     return str(uuid.uuid4())
 
-#-----------------------------------------------------------------------------------------------
+@tool 
+def agent_selector_tool(query: str) -> Command:
+    """
+    A tool that selects the most relevant agent based on the user input.
+    :return: The name of the selected agent.
+    """
+    agent = library.search_agents(query)[0]["name"]
+    return Command(update={"messages": [{"role": "system", "content": f"call: {agent}"}]}, goto=agent)
 
-def product_search_agent(state: State) -> Command[Literal["order_agent", "human_input_agent", "product_search_tool"]]:
+#-----------------------------------------------------------------------------------------------
+@library.add_agent("product_search_agent")
+def product_search_agent(state: State) -> Command[Literal["order_agent", "human_input_agent", "product_search_tool", "agent_selector_tool"]]:
+    """
+    Your are an expert providing information about available furniture to purchase.
+    """
+
     prompt = """
         Your are an expert providing information about available furniture to purchase.
 
-        ONLY call your tool if you have no products in your context. Otherwise use your context.
-        
         1. Search for a product based on the user input, using your tool.
         2. If you find a product, return the product name and description.
         3. Ask the user if he is satisfied with the result by calling the human_input_agent
@@ -98,18 +168,19 @@ def product_search_agent(state: State) -> Command[Literal["order_agent", "human_
         6. If you don't find a product, ask the user if he wants to change his search.
         7. If the user wants to change his search, return to step 1.
 
-        Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
+        To select the next agent to call, use your provided tool.
     """
 
     prompt_template = ChatPromptTemplate.from_messages(
         [("system", prompt), ("placeholder", "{input}")]
     )
-    call = prompt_template | llm.bind_tools([product_search_tool], tool_choice="auto")
+    call = prompt_template | llm.bind_tools([product_search_tool, agent_selector_tool], tool_choice="auto")
     result = call.invoke({"input": state["messages"]})
     return generate_route(result)()
 
 workflow.add_node("product_search_agent", product_search_agent)
 workflow.add_node("product_search_tool", ToolNode([product_search_tool]))
+workflow.add_node("agent_selector_tool", ToolNode([agent_selector_tool]))
 
 #-----------------------------------------------------------------------------------------------
 
@@ -188,6 +259,7 @@ workflow.add_node("human_input_agent", human_input_agent)
 workflow.add_edge(START, "product_search_agent")
 
 workflow.add_edge("product_search_tool", "product_search_agent")
+workflow.add_edge("agent_selector_tool", "product_search_agent")
 workflow.add_edge("order_tool", "order_agent")
 workflow.add_edge("order_agent", END)
 
