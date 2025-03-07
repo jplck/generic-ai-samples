@@ -22,10 +22,10 @@
                 "ms-vscode.js-debug",
                 "esbenp.prettier-vscode",
                 "dbaeumer.vscode-eslint",
-                "ms-azuretools.vscode-azurefunctions",
                 "github.vscode-github-actions",
                 "GitHub.copilot",
-                "ms-python.black-formatter"
+                "ms-python.black-formatter",
+                "github.vscode-pull-request-github"
             ]
         },
         "codespaces": {
