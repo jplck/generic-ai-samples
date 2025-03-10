@@ -1,6 +1,8 @@
 
 import os
 from typing import Any, Dict, List, Literal, Annotated, TypedDict, cast
+from langchain_core.tools.base import InjectedToolCallId
+from langgraph.prebuilt import InjectedState
 from dataclasses import dataclass
 import json
 import dotenv
@@ -82,34 +84,68 @@ def order_tool(order_details: str) -> str:
     """
     return str(uuid.uuid4())
 
-#-----------------------------------------------------------------------------------------------
+class RouteTemplate:
+    description: str
+    goto: str
 
+@tool
+def goto_human_input_agent():
+    """
+    Use this tool as soon as you want to call the human_input_agent.
+    """
+    return "call: human_input_agent"
+
+def add_tool(description: str, goto: str, tool_name: str = None):
+    """
+    Generic tool creator
+    """
+    def tool_call (tool_call_id: Annotated[str, InjectedToolCallId]) -> Command:
+        return Command(
+            update={"messages": [{"role": "tool", "content": "transfer", "tool_call_id": tool_call_id}]},
+            goto=goto,
+        )
+
+    return tool(
+        name_or_callable=tool_name if tool_name else f"{goto}-transfer-tool",
+        runnable=tool_call,
+        description=description,
+    )
+     
+
+@dataclass
+class RouteMapping():
+    tool_name: str
+    via: str #Name of tool node that bundles the tools
+
+#-----------------------------------------------------------------------------------------------
+goto_order_agent = add_tool(
+    "Use this tool as soon as you want to call the order_agent.",
+    "order_agent",
+)
+tools = [product_search_tool, goto_order_agent, goto_human_input_agent]
 def product_search_agent(state: State) -> Command[Literal["order_agent", "human_input_agent", "product_search_tool"]]:
     prompt = """
         Your are an expert providing information about available furniture to purchase.
 
-        ONLY call your tool if you have no products in your context. Otherwise use your context.
-        
-        1. Search for a product based on the user input, using your tool.
-        2. If you find a product, return the product name and description.
-        3. Ask the user if he is satisfied with the result by calling the human_input_agent
-        4. If the user is not satisfied, ask for more details and call the products_search_tool again.
-        5. If the user is satisfied, continue to the order_agent.
-        6. If you don't find a product, ask the user if he wants to change his search.
-        7. If the user wants to change his search, return to step 1.
-
-        Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
+        Search for a product based on the user input, using your tool.
+        - If you find a product, return the product name and description. And ask the human if he is satisfied with the result.
+        If you don't find a product, ask the user if he wants to change his search.
+        If the user wants to change his search, return to step 1.
     """
 
     prompt_template = ChatPromptTemplate.from_messages(
         [("system", prompt), ("placeholder", "{input}")]
     )
-    call = prompt_template | llm.bind_tools([product_search_tool], tool_choice="auto")
+    call = prompt_template | llm.bind_tools(tools, tool_choice="auto")
     result = call.invoke({"input": state["messages"]})
-    return generate_route(result)()
+    return generate_route(result, "human_input_agent",[
+        RouteMapping("product_search_tool", "product_search_tool"),
+        RouteMapping("goto_order_agent", "product_search_tool"),
+        RouteMapping("goto_human_input_agent", "product_search_tool")
+    ])()
 
 workflow.add_node("product_search_agent", product_search_agent)
-workflow.add_node("product_search_tool", ToolNode([product_search_tool]))
+workflow.add_node("product_search_tool", ToolNode(tools))
 
 #-----------------------------------------------------------------------------------------------
 
@@ -137,7 +173,7 @@ def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__",
     )
     call = prompt_template | llm.bind_tools([order_tool], tool_choice="auto")
     result = call.invoke({"input": state["messages"]})
-    return generate_route(result)()
+    return generate_route(result, "human_input_agent")()
 
 workflow.add_node("order_agent", order_agent)
 workflow.add_node("order_tool", ToolNode([order_tool]))
@@ -171,15 +207,18 @@ def human_input_agent(
         goto=active_agent,
     )  
 
-def generate_route(result: AIMessage) -> Route:
+def generate_route(result: AIMessage, default_node: str, mappings: List[RouteMapping]) -> Route:
     update = {"messages": [result]}
     if not result.tool_calls:
-        agent_name = result.content.split("call: ")[-1]
-        #Return END if no agent name is provided
-        goto = agent_name if agent_name else END
+        goto = default_node
     else:
-        tool_calls = result.additional_kwargs["tool_calls"]
-        goto=[call["function"]["name"] for call in tool_calls]
+        gotos = []
+        for tool_call in result.tool_calls:
+            for mapping in mappings:
+                if mapping.tool_name == tool_call["name"]:
+                    gotos.append(mapping.via)
+                    
+        goto=gotos
 
     return Route(update, goto=goto)
 
