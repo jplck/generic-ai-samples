@@ -1,6 +1,6 @@
 
 import os
-from typing import Any, Dict, List, Literal, Annotated, TypedDict, cast
+from typing import Any, Dict, List, Literal, Annotated, TypedDict, cast, Sequence
 from langchain_core.tools.base import InjectedToolCallId
 from langgraph.prebuilt import InjectedState
 from dataclasses import dataclass
@@ -8,7 +8,7 @@ import json
 import dotenv
 from pathlib import Path
 from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, MessageLikeRepresentation, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
@@ -25,6 +25,8 @@ from langchain_core.tools import tool
 from langgraph.types import Command, interrupt
 from llm import prepare_azure_openai_completion_model, prepare_azure_openai_embeddings_model
 import uuid
+import random
+import string
 
 dotenv.load_dotenv()
 
@@ -60,7 +62,6 @@ class Route:
         return Command(update=self.data, goto=self.goto)
 
 #-----------------------------------------------------------------------------------------------
-
 @tool
 def product_search_tool(query: str) -> str:
     """
@@ -71,118 +72,45 @@ def product_search_tool(query: str) -> str:
         products = json.load(f)
     return products
 
-@tool
-def order_tool(order_details: str) -> str:
-    """
-    A tool that sends out product order orders and returns the shipping details.
-    Required order details are:
-    - User shipping address and user name
-    - User payment method
-    - User email address or phone number for SMS for shipping updates
-    - Product name and description + quantity
-    :return: The order confirmation number.
-    """
-    return str(uuid.uuid4())
-
-class RouteTemplate:
-    description: str
-    goto: str
-
-@tool
-def goto_human_input_agent():
-    """
-    Use this tool as soon as you want to call the human_input_agent.
-    """
-    return "call: human_input_agent"
-
-def add_tool(description: str, goto: str, tool_name: str = None):
-    """
-    Generic tool creator
-    """
-    def tool_call (tool_call_id: Annotated[str, InjectedToolCallId]) -> Command:
-        return Command(
-            update={"messages": [{"role": "tool", "content": "transfer", "tool_call_id": tool_call_id}]},
-            goto=goto,
-        )
-
-    return tool(
-        name_or_callable=tool_name if tool_name else f"{goto}-transfer-tool",
-        runnable=tool_call,
-        description=description,
-    )
-     
-
-@dataclass
-class RouteMapping():
-    tool_name: str
-    via: str #Name of tool node that bundles the tools
-
-#-----------------------------------------------------------------------------------------------
-goto_order_agent = add_tool(
-    "Use this tool as soon as you want to call the order_agent.",
-    "order_agent",
-)
-tools = [product_search_tool, goto_order_agent, goto_human_input_agent]
-def product_search_agent(state: State) -> Command[Literal["order_agent", "human_input_agent", "product_search_tool"]]:
-    prompt = """
-        Your are an expert providing information about available furniture to purchase.
-
-        Search for a product based on the user input, using your tool.
-        - If you find a product, return the product name and description. And ask the human if he is satisfied with the result.
-        If you don't find a product, ask the user if he wants to change his search.
-        If the user wants to change his search, return to step 1.
-    """
-
-    prompt_template = ChatPromptTemplate.from_messages(
-        [("system", prompt), ("placeholder", "{input}")]
-    )
-    call = prompt_template | llm.bind_tools(tools, tool_choice="auto")
-    result = call.invoke({"input": state["messages"]})
-    return generate_route(result, "human_input_agent",[
-        RouteMapping("product_search_tool", "product_search_tool"),
-        RouteMapping("goto_order_agent", "product_search_tool"),
-        RouteMapping("goto_human_input_agent", "product_search_tool")
-    ])()
-
-workflow.add_node("product_search_agent", product_search_agent)
-workflow.add_node("product_search_tool", ToolNode(tools))
-
-#-----------------------------------------------------------------------------------------------
-
-def order_agent(state: State) -> Command[Literal["human_input_agent", "__end__", "product_search_agent", "order_tool"]]:
-    prompt = """
-    Your are an expert that prepares an order based on an input context. 
-    Do not call your order_tool before you have all the information in your context.
+def create_agent(graph: StateGraph, llm, agent_name: str, prompt: str, inputs: Sequence[MessageLikeRepresentation] = (), tools: List[callable] = None):
+    tool_node_name = f"{agent_name}_tools"
     
-    Call the human_input_agent agent to gather user input.
-    - User shipping address and user name
-    - User payment method
-    - User email address or phone number for SMS for shipping updates
+    def agent_runner(state: State):
+        prompt_template = ChatPromptTemplate.from_messages(
+            [("system", prompt), ("placeholder", "{input}"), *inputs]
+        )
+        call = prompt_template | llm.bind_tools(tools, tool_choice="auto")
+        results = call.invoke({"input": state["messages"]})
+        if len(results.tool_calls) > 0:
+            return Command(goto=tool_node_name, update={"messages": [results]})
+        
+        return {"messages": [results]}
+    
+    graph.add_node(agent_name, agent_runner, destinations=tuple([tool_node_name]) if tools else None)
 
-    1. Ask the user if he wants to proceed with the order.
-    2. If the user wants to proceed, call the order_tool to place the order. If the order is successful, return the order confirmation number and end the conversation by calling the __end__ agent.
-    3. If the user wants to revisit his search, call product_search_agent.
-    4. If the user wants to cancel, return END.
-    5. If the user wants to change his order, return to step 1.
-
-    Add the agent name you want to call to the end of your message. Use the form "call: <agent_name>".
-    """
-
-    prompt_template = ChatPromptTemplate.from_messages(
-        [("system", prompt), ("placeholder", "{input}")]
-    )
-    call = prompt_template | llm.bind_tools([order_tool], tool_choice="auto")
-    result = call.invoke({"input": state["messages"]})
-    return generate_route(result, "human_input_agent")()
-
-workflow.add_node("order_agent", order_agent)
-workflow.add_node("order_tool", ToolNode([order_tool]))
-
-#-----------------------------------------------------------------------------------------------
+    if tools:
+        def tool_runner(state: State):
+            results = []
+            message:AIMessage = state["messages"][-1]
+            tool_calls = message.tool_calls
+            if not tool_calls:
+                return results
+            tools_by_name = {tool.name: tool for tool in tools}
+            for tool_call in tool_calls:
+                tool = tools_by_name[tool_call["name"]]
+                tool_response = tool.invoke(tool_call)
+                if isinstance(tool_response, Command):
+                    results.append(tool_response)
+                elif isinstance(tool_response, ToolMessage):
+                    results.append(Command(update={"messages": [tool_response]}))
+            return results
+        
+        graph.add_node(tool_node_name, tool_runner)
+        graph.add_edge(tool_node_name, agent_name)
 
 def human_input_agent(
     state: State, config
-) -> Command[Literal["order_agent", "product_search_agent"]]:
+) -> Command[Literal["product_search_agent"]]:
     """A node for collecting user input."""
 
     user_input = interrupt(value="Ready for user input.")
@@ -207,28 +135,28 @@ def human_input_agent(
         goto=active_agent,
     )  
 
-def generate_route(result: AIMessage, default_node: str, mappings: List[RouteMapping]) -> Route:
-    update = {"messages": [result]}
-    if not result.tool_calls:
-        goto = default_node
-    else:
-        gotos = []
-        for tool_call in result.tool_calls:
-            for mapping in mappings:
-                if mapping.tool_name == tool_call["name"]:
-                    gotos.append(mapping.via)
-                    
-        goto=gotos
+create_agent(
+    graph=workflow,
+    llm=llm,
+    agent_name="product_search_agent",
+    prompt=""""
+        You are a product search agent that takes user input to search for furniture.
+        if you find products, return a list of product names and descriptions to the user.
+        If you don't find any product, return 'No products found'.
+        """,
+    tools=[product_search_tool],
+)
 
-    return Route(update, goto=goto)
-
-workflow.add_node("human_input_agent", human_input_agent)
+create_agent(
+    graph=workflow,
+    llm=llm,
+    agent_name="human_input_agent",
+    prompt=""""
+        You are a human input agent that is called whenever the user is required to provide input.
+        """,
+)
 
 workflow.add_edge(START, "product_search_agent")
-
-workflow.add_edge("product_search_tool", "product_search_agent")
-workflow.add_edge("order_tool", "order_agent")
-workflow.add_edge("order_agent", END)
 
 graph = workflow.compile()
 graph.name = "Prodcut Search Graph"
