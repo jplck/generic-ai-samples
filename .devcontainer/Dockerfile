@@ -1,6 +1,8 @@
-ARG VARIANT=bookworm
+ARG VARIANT=bullseye
 ARG VERSION=3.13
 FROM --platform=amd64 mcr.microsoft.com/devcontainers/python:${VERSION}-${VARIANT}
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
