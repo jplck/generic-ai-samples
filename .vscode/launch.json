@@ -19,13 +19,6 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python Debugger: Chat Langgraph app.py",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "samples.chat_langgraph.app",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "Python Debugger: Vision app.py",
             "type": "debugpy",
             "request": "launch",
@@ -47,12 +40,6 @@
                 "host": "localhost",
                 "port": 2026
             },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
-                }
-            ],
             "justMyCode": false
         }
     ]
