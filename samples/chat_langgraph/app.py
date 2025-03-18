@@ -89,12 +89,12 @@ agents.create_agent(
     prompt="""
         You are an expert that helps the user to find a product in a furniture store.
         You have access to a product search tool that can search for products in a database.
-        If you find products that match the user's query, return the product name and description for a maximum of 3 products.
-        You can also call the order_agent agent to prepare an order if the user picks a product.
-        You are not allowed to call the order_tool directly.
+        If you found products, return a summary of a maximum of five products to the user.
 
-        Use the following context to search for products and handle the user interaction.
-        {input}
+        Call the human_input_agent to ask the user what product to pick. If the user picks a product, continue to the order_agent.
+
+        Use the following context:
+        {context}
     """,
     llm=llm,
     name="product_search_agent",
@@ -107,7 +107,7 @@ agents.create_agent(
         Your are an expert that prepares an order based on an input context. 
         Do not call your order_tool before you have all the information in your context.
         
-        {input}
+        {context}
 
         Call the human_input_agent agent to gather user input.
         - User shipping address and user name

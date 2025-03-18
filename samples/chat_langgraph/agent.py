@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Literal, Annotated, TypedDict, cast
 from dataclasses import dataclass
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 from langgraph.types import Command, interrupt
@@ -10,6 +10,8 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.output_parsers import PydanticOutputParser
 from langgraph.graph.message import AnyMessage, add_messages
 from langchain_core.runnables.config import RunnableConfig
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, SystemMessage
 
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
@@ -87,16 +89,37 @@ class Agent:
         parser = PydanticOutputParser(pydantic_object=Route)
 
         def _create_agent_node(state: State):
-            template = prompt + "\n\n" + "{format_instructions}"
 
-            prompt_template = PromptTemplate(
-                template=template,
-                input_variables=["input", "next_agents"],
-                partial_variables={"format_instructions": parser.get_format_instructions()},
-            )
+            #create list of docstring from next_agents
+            next_agent_descriptions = {}
+            for agent in next_agents:
+                if agent in self.agents:
+                    next_agent_descriptions[agent] = self.agents[agent].__doc__
+                elif agent == "__end__":
+                    next_agent_descriptions[agent] = "End of workflow"
+                else:
+                    next_agent_descriptions[agent] = "No description available"
+
+            #convert to string
+            next_agent_descriptions = "\n".join([f"{k}: {v}" for k, v in next_agent_descriptions.items()])
+
+            extended_prompt = """
+            ################################################
+            Use the folowing information to help you decide which agent to call next:
+            Next agents available: {next_agents}
+            ################################################
+            Format instructions: {format_instructions}
+            """
+
+            prompt_template = ChatPromptTemplate.from_messages([
+                SystemMessage(prompt+extended_prompt),
+                MessagesPlaceholder("context"),
+                MessagesPlaceholder("next_agents"),
+                MessagesPlaceholder("format_instructions"),
+            ])
 
             call = prompt_template | llm.bind_tools(tools, tool_choice="auto")
-            raw_result = call.invoke({"input": state["messages"], "next_agents": next_agents})
+            raw_result = call.invoke({"context": state["messages"], "next_agents": [next_agent_descriptions], "format_instructions": [parser.get_format_instructions()]})
 
             if raw_result.tool_calls:
                 return Command(
