@@ -1,7 +1,4 @@
-langgraph dev --debug-port 2026
-
 # Decision based agentic network routing
-
 Having an agent based network, including external inputs from humands tends to be challenging. Langgraph introduced a command based routing mechanism that offers an alternative approach on how to route by using direct directions instead of edge definitions and conditional if/else statements.
 
 Why langgraph. As of now, langgraph gives the developer the most flexibility when it comes to developing agent based systems. I found that especially when using human in the loop patterns, other frameworks like autogen offer a most opinmioted approach that works in some but not all cases as intended.
@@ -60,3 +57,15 @@ Defining both the pydantic output object and the extended prompt enables the mod
 An additional benefit of the provided solution is, that it allows for addional (mechanical) filtering of the next agents to call. Instead of just relying on the "goto" field, fields like the capability_description can be used to call vector databases to search for the next targets to call.
 
 Implementation wise the solution required to create a wrapper around the common agent implementation in langgraph.
+
+## Setup & Run
+How to run the sample application?
+
+```
+pip install -r requirements.txt
+
+langgraph dev --debug-port 2026
+
+# If in VSCode run Remote Attach - Langgraph Dev Debug Config
+
+```

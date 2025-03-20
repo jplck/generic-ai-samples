@@ -33,7 +33,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python Debugger: Remote Attach",
+            "name": "Remote Attach - Langgraph Dev",
             "type": "debugpy",
             "request": "attach",
             "connect": {
