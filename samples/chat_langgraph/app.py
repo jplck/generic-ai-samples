@@ -5,41 +5,15 @@ from dataclasses import dataclass
 import json
 import dotenv
 from pathlib import Path
-from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
-from langchain_core.messages import AIMessage
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
-from langgraph.prebuilt import ToolNode
-from openinference.instrumentation.langchain import LangChainInstrumentor
-from opentelemetry import trace, trace as trace_api
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.langchain import LangchainInstrumentor
-from opentelemetry.sdk import trace as trace_sdk
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from token_counter import TokenCounterCallback
 from langchain_core.tools import tool
-from langgraph.types import Command, interrupt
 from llm import prepare_azure_openai_completion_model, prepare_azure_openai_embeddings_model
 import uuid
 from agent import Agent
 
 dotenv.load_dotenv()
-
-def setup_tracing():
-    exporter = AzureMonitorTraceExporter.from_connection_string(
-        os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"]
-    )
-    tracer_provider = TracerProvider()
-    trace.set_tracer_provider(tracer_provider)
-    tracer = trace.get_tracer(__name__)
-    span_processor = BatchSpanProcessor(exporter, schedule_delay_millis=60000)
-    trace.get_tracer_provider().add_span_processor(span_processor)
-    LangchainInstrumentor().instrument()
-    return tracer
-
-tracer = setup_tracing()
 
 callback = TokenCounterCallback()
 llm = prepare_azure_openai_completion_model([callback])
@@ -50,7 +24,6 @@ class State(TypedDict):
 
 # Define a new graph
 workflow = StateGraph(State)
-
 agents = Agent(workflow)
 
 #-----------------------------------------------------------------------------------------------
@@ -68,7 +41,7 @@ def product_search_tool(query: str) -> str:
 @tool
 def order_tool(order_details: str) -> str:
     """
-    A tool that sends out product order orders and returns the shipping details.
+    A tool that sends out product order orders and returns the shipping number.
     Required order details are:
     - User shipping address and user name
     - User payment method
@@ -97,28 +70,32 @@ agents.create_agent(
         {context}
     """,
     llm=llm,
-    name="product_search_agent",
+    agent_name="product_search_agent",
     tools=[product_search_tool],
     next_agents=["human_input_agent", "order_agent", "__end__"],
 )
 
 agents.create_agent(
     prompt="""
-        Your are an expert that prepares an order based on an input context. 
-        Do not call your order_tool before you have all the information in your context.
-        
+        Input:
         {context}
 
-        Call the human_input_agent agent to gather user input.
-        - User shipping address and user name
-        - User payment method
-        - User email address or phone number for SMS for shipping updates
+        Format your input as a table with the following format use ONLY the prodcuts the user selected:
+        Example:
+        | Product Name | Description | Price |
+        |--------------|-------------|-------|
+        | Chair        | A comfy chair| $50   |
+        | Table        | A wooden table| $100  |
+        | Sofa         | A leather sofa| $500  |
+        |--------------|-------------|-------|
+        | Total        |             | $650  |
+        |--------------|-------------|-------|
 
-        If you have all the information in your context, call the order_tool to prepare the order.
-        If the order_tool returns a confirmation number, return it to the user.
+        After you have formatted the result, call the human_input_agent to ask the user if he wants to order the products.
+
     """,
     llm=llm,
-    name="order_agent",
+    agent_name="order_agent",
     tools=[order_tool],
     next_agents=["human_input_agent", "product_search_agent", "__end__"],
 )

@@ -1,7 +1,7 @@
 # Decision based agentic network routing
 Having an agent based network, including external inputs from humands tends to be challenging. Langgraph introduced a command based routing mechanism that offers an alternative approach on how to route by using direct directions instead of edge definitions and conditional if/else statements.
 
-Why langgraph. As of now, langgraph gives the developer the most flexibility when it comes to developing agent based systems. I found that especially when using human in the loop patterns, other frameworks like autogen offer a most opinmioted approach that works in some but not all cases as intended.
+Why langgraph. In my opinion, langgraph gives the developer the most flexibility when it comes to developing agent based systems. I found that especially when using human in the loop patterns, other frameworks like autogen offer a most opinmioted approach that works in some but not all cases as intended.
 
 Langgraph on the other side works nice, but requires boilerplate to work as intended.
 

@@ -12,6 +12,7 @@ from langgraph.graph.message import AnyMessage, add_messages
 from langchain_core.runnables.config import RunnableConfig
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, SystemMessage
+from tracer import AppInsightsTracer
 
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
@@ -24,6 +25,7 @@ class Agent:
         self.agents = {}
         self.links = {}
         self._graph = graph
+        self._tracer = AppInsightsTracer()
 
     def _add_to_registry(self, agent_name: str, agent: callable = None):
         if agent_name not in self.agents:
@@ -48,9 +50,9 @@ class Agent:
     def create_hil_agent(self, agent_name: str, next_agents: List[str]) -> str:
         def _create(state: State, config: RunnableConfig):
             """A node for collecting user input."""
-
+            
             user_input = interrupt(value="Ready for user input.")
-
+            #with self._tracer.get_tracer().start_as_current_span(agent_name):
             # identify the last active agent
             # (the last active node before returning to human)
             langgraph_triggers = config["metadata"]["langgraph_triggers"]
@@ -74,13 +76,13 @@ class Agent:
         self._add_to_registry(agent_name, _create)
         return agent_name
 
-    def create_agent(self, prompt: str, llm: BaseChatModel, name: str, tools: List[callable] = [], next_agents: List[str] = []) -> str:
+    def create_agent(self, prompt: str, llm: BaseChatModel, agent_name: str, tools: List[callable] = [], next_agents: List[str] = []) -> str:
         """Creates an agent."""
         
-        tool_node_name = f"{name}_tools"
+        tool_node_name = f"{agent_name}_tools"
         
         class Route(BaseModel):
-            result: str = Field(..., description="The result of the agent's action")
+            result: str = Field(..., description="The agent's response")
             goto: str = Field(..., description="The next agent to call")
             capability_description: str = Field(
                 description="A query that can be used to search a vector database for the agent's capabilities",
@@ -104,20 +106,21 @@ class Agent:
             next_agent_descriptions = "\n".join([f"{k}: {v}" for k, v in next_agent_descriptions.items()])
 
             extended_prompt = """
-            ################################################
+            -----------------------------
             Use the folowing information to help you decide which agent to call next:
             Next agents available: {next_agents}
-            ################################################
+            -----------------------------
             Format instructions: {format_instructions}
             """
 
             prompt_template = ChatPromptTemplate.from_messages([
-                SystemMessage(prompt+extended_prompt),
+                SystemMessage(f"{prompt}\n\n{extended_prompt}"),
                 MessagesPlaceholder("context"),
                 MessagesPlaceholder("next_agents"),
                 MessagesPlaceholder("format_instructions"),
             ])
 
+            #with self._tracer.get_tracer().start_as_current_span(agent_name):
             call = prompt_template | llm.bind_tools(tools, tool_choice="auto")
             raw_result = call.invoke({"context": state["messages"], "next_agents": [next_agent_descriptions], "format_instructions": [parser.get_format_instructions()]})
 
@@ -142,11 +145,11 @@ class Agent:
                 },
                 goto=result.goto,
         ) 
-        self._add_links(name, next_agents + [tool_node_name] if tools else [])
-        self._add_to_registry(name, _create_agent_node)
+        self._add_links(agent_name, next_agents + [tool_node_name] if tools else [])
+        self._add_to_registry(agent_name, _create_agent_node)
 
         if tools:
             self._graph.add_node(tool_node_name, ToolNode(tools))
-            self._graph.add_edge(tool_node_name, name)
+            self._graph.add_edge(tool_node_name, agent_name)
         
-        return name
+        return agent_name
