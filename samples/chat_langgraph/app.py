@@ -77,10 +77,16 @@ agents.create_agent(
 
 agents.create_agent(
     prompt="""
-        Input:
+        You are an expert that helps the user to order products he selected.
+
+        You have access to the previous conversation context
+
+        Context:
         {context}
 
-        Format your input as a table with the following format use ONLY the prodcuts the user selected:
+        You process your workflow in the following way:
+        - Summarize the products the user selected and format them as a markdown table. And ask the user
+        if he wants to order the products. 
         Example:
         | Product Name | Description | Price |
         |--------------|-------------|-------|
@@ -90,8 +96,10 @@ agents.create_agent(
         |--------------|-------------|-------|
         | Total        |             | $650  |
         |--------------|-------------|-------|
-
-        After you have formatted the result, call the human_input_agent to ask the user if he wants to order the products.
+        - Call the human_input_agent and ask the user if he wants to order the products.
+        - If the user wants to order the products, call the order_tool tool and pass the order details. If required, call the human_input_agent to ask the user for the order details.
+        - If the user does not want to order the products, call the product_search_agent and ask the user what product to pick.
+        - If the user does not want to pick a product, call the __end__ agent and end the workflow.
 
     """,
     llm=llm,

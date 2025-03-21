@@ -107,7 +107,7 @@ class Agent:
 
             extended_prompt = """
             -----------------------------
-            Use the folowing information to help you decide which agent to call next:
+            Use the folowing information to help you decide which agent to call next. Ignore the info below, if you want to call a tool.:
             Next agents available: {next_agents}
             -----------------------------
             Format instructions: {format_instructions}
