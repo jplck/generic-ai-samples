@@ -22,6 +22,9 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName, 'app': 'ai-agents', 'tracing': 'yes' }
 param searchIndexName string = 'search-index'
+
+//https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions
+
 param completionDeploymentModelName string = 'gpt-4o'
 param completionModelName string = 'gpt-4o'
 param completionModelVersion string = '2024-08-06'
@@ -32,7 +35,7 @@ param openaiApiVersion string = '2024-08-01-preview'
 param openaiCapacity int = 50
 param voiceDeploymentModelName string = 'gpt-4o-realtime-preview'
 param voiceModelName string = 'gpt-4o-realtime-preview'
-param voiceModelVersion string = '2024-10-01'
+param voiceModelVersion string = '2024-12-17'
 
 param modelDeployments array = [
   {
@@ -165,3 +168,4 @@ output FRONTEND_SITE_NAME string = 'http://127.0.0.1:3000'
 output STORAGE_ACCOUNT_URL string = storage.outputs.storageAccountUrl
 output UPLOAD_RESULTS bool = false
 output CHUNKING_ENABLED bool = true
+output GITHUB_MODELS_TOKEN string = ''
