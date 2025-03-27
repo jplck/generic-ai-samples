@@ -11,3 +11,5 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && curl -fsSL https://aka.ms/install-azd.sh | bash \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
