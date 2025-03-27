@@ -9,22 +9,17 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
 from token_counter import TokenCounterCallback
 from langchain_core.tools import tool
-from llm import prepare_azure_openai_completion_model, prepare_azure_openai_embeddings_model
 import uuid
-from agent import Agent
+from agent import AgentSystem
+from llm import get_model_on_azure, get_github_model
 
 dotenv.load_dotenv()
 
 callback = TokenCounterCallback()
-llm = prepare_azure_openai_completion_model([callback])
 
-# Define the state for the agent
-class State(TypedDict):
-    messages: Annotated[list[AnyMessage], add_messages]
-
-# Define a new graph
-workflow = StateGraph(State)
-agents = Agent(workflow)
+llm = get_model_on_azure(os.getenv("AZURE_OPENAI_COMPLETION_DEPLOYMENT_NAME"), temperature=1.0, callbacks=[callback])
+#llm = get_github_model()
+agents = AgentSystem()
 
 #-----------------------------------------------------------------------------------------------
 
@@ -110,7 +105,6 @@ agents.create_agent(
 
 #-----------------------------------------------------------------------------------------------
 
-workflow.add_edge(START, "product_search_agent")
-graph = agents.compile_graph()
-graph.name = "Prodcut Search Graph"
+graph = agents.compile_graph(initial_agent="product_search_agent")
+graph.name = "Product Search Graph"
 
